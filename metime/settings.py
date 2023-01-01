@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-yh(y)y1#4$m@x8$j9bfk(+!9(volqgp08fn#1h%c!_z@f*okqu'
+SECRET_KEY = os.getenv("SECRET_KEY", 'django-insecure-yh(y)y1#4$m@x8$j9bfk(+!9(volqgp08fn#1h%c!_z@f*okqu')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False if os.getenv("DEBUG", "false").lower() not in ("true", "yes") else True
 
 ALLOWED_HOSTS = []
 
@@ -73,10 +73,28 @@ WSGI_APPLICATION = 'metime.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+DB_NAME = os.getenv("POSTGRES_DB", "data_warehouse")
+DB_USER = os.getenv("POSTGRES_USER", "postgres")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
+DB_PORT = os.getenv("POSTGRES_PORT", 5433)
+DB_HOST = os.getenv("POSTGRES_HOST", "10.0.0.19")
+# DB_CONNECTION_URI = F"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'PORT': DB_PORT,
+        'HOST': DB_HOST,
     }
 }
 
