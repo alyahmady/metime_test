@@ -1,1 +1,3 @@
 # metime_test
+
+DATABASE USER AND DB CREATION

@@ -80,11 +80,11 @@ WSGI_APPLICATION = 'metime.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DB_NAME = os.getenv("POSTGRES_DB", "data_warehouse")
-DB_USER = os.getenv("POSTGRES_USER", "postgres")
-DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "postgres")
-DB_PORT = os.getenv("POSTGRES_PORT", 5433)
-DB_HOST = os.getenv("POSTGRES_HOST", "10.0.0.19")
+DB_NAME = os.getenv("POSTGRES_DB", "metime")
+DB_USER = os.getenv("POSTGRES_USER", "metime")
+DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "metime")
+DB_PORT = os.getenv("POSTGRES_PORT", 5432)
+DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
 # DB_CONNECTION_URI = F"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # DATABASES = {
