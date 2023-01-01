@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser, UserManager
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
@@ -9,34 +10,43 @@ from phonenumber_field.phonenumber import to_python, PhoneNumber
 
 
 class CustomUserManager(UserManager):
+    def create(self, *args, **kwargs):
+        self.create_user(*args, **kwargs)
+
     def create_user(self, phone=None, email=None, password=None, **extra_fields):
         """
         Create and save a User with the given email and password.
         """
-        extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_email_verified', False)
+        extra_fields.setdefault('is_active', True)
 
-        if not email:
-            raise ValueError(_('The Email must be set'))
+        if not email and not phone:
+            raise ValueError(_('Either Email or Phone must be set'))
 
-        email = self.normalize_email(email)
+        if not password:
+            raise ValueError(_("User creation without setting password is not allowed"))
+
+        if email:
+            email = self.normalize_email(email)
+
         user = self.model(email=email, phone=phone, **extra_fields)
+        validate_password(password)
         user.set_password(password)
         user.save()
         return user
 
-    def create_superuser(self, email, password, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):
         """
         Create and save a SuperUser with the given email and password.
         """
-        extra_fields['is_staff'] = True
         extra_fields['is_superuser'] = True
-        extra_fields['is_active'] = True
+        extra_fields['is_staff'] = True
         extra_fields['is_email_verified'] = True
+        extra_fields['is_active'] = True
 
-        return self.create_user(email, password, **extra_fields)
+        return self.create_user(email=email, password=password, **extra_fields)
 
     def get_by_natural_key(self, user_identifier):
         field_name, validated_value = self.model.get_user_identifier_field(user_identifier)
