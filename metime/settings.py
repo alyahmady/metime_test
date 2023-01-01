@@ -189,3 +189,5 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "auth_app.serializers.CustomTokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "auth_app.serializers.CustomTokenRefreshSerializer",
 }
+
+AUTHENTICATION_BACKENDS = ["auth_app.backend.CustomUserAuthBackend"]
