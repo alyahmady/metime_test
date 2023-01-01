@@ -102,6 +102,7 @@ class CustomUser(AbstractUser):
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     EMAIL_FIELD = "email"
+    PHONE_FIELD = "phone"
 
     objects = CustomUserManager()
 
