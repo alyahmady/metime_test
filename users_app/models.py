@@ -49,7 +49,7 @@ class CustomUser(AbstractUser):
         return ' '.join([self.first_name or "", self.last_name or ""]).strip()
 
     class Meta:
-        app_label = 'users'
+        app_label = 'users_app'
         db_table = 'metime_users'
         ordering = ['-date_joined']
         default_related_name = 'users'
