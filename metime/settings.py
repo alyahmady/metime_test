@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'phonenumber_field',
-    'auth.apps.AuthConfig'
+    'users_app.apps.UsersAppConfig'
 ]
 
 MIDDLEWARE = [
@@ -145,7 +145,7 @@ STATIC_URL = 'static/'
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
-AUTH_USER_MODEL = 'auth.CustomUser'
+AUTH_USER_MODEL = 'users_app.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
