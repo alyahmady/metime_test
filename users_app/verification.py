@@ -4,6 +4,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 
+from metime import celery_app
+
 
 def activation_key_generator() -> str:
     code_max_range = int("9" * settings.VERIFICATION_CODE_DIGITS_COUNT)
@@ -11,6 +13,7 @@ def activation_key_generator() -> str:
     return code.rjust(settings.VERIFICATION_CODE_DIGITS_COUNT, "0")
 
 
+@celery_app.task(ignore_result=True)
 def send_user_verification_code(user: get_user_model()) -> None:
     if user.is_verified:
         raise ValueError("User is already verified")
@@ -30,6 +33,7 @@ def send_user_verification_code(user: get_user_model()) -> None:
     )
 
 
+@celery_app.task(ignore_result=True)
 def send_user_reset_password_code(user: get_user_model()):
     activation_key = activation_key_generator()
 
