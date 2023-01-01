@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "phonenumber_field",
     "users_app.apps.UsersAppConfig",
+    "rest_framework_simplejwt"
 ]
 
 MIDDLEWARE = [
