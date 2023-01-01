@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'phonenumber_field',
     'auth.apps.AuthConfig'
 ]
 
@@ -166,3 +167,5 @@ SPECTACULAR_SETTINGS = {
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+PHONENUMBER_DEFAULT_REGION = os.getenv('PHONENUMBER_DEFAULT_REGION', 'IR')
