@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "phonenumber_field",
     "users_app.apps.UsersAppConfig",
-    "rest_framework_simplejwt"
+    "rest_framework_simplejwt",
 ]
 
 MIDDLEWARE = [
@@ -171,6 +171,9 @@ SPECTACULAR_SETTINGS = {
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAdminUser",
+    ],
 }
 
 PHONENUMBER_DEFAULT_REGION = os.getenv("PHONENUMBER_DEFAULT_REGION", "IR")
