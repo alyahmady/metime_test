@@ -10,6 +10,15 @@ class CeleryConfigurations:
     task_track_started = settings.DEBUG
     task_time_limit = 60  # seconds
     result_backend = settings.DB_CONNECTION_URI
+    broker_url = settings.REDIS_CONNECTION_URI
+
+    task_routes = None
+    task_queues = None
+    task_create_missing_queues = True
+    task_default_queue = "metime_celery"
+    imports = [
+        'users_app.verification'
+    ]
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "metime.settings")
