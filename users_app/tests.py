@@ -43,7 +43,7 @@ class CustomUserTestCase(TestCase):
             email="admin@gmail.com", password="HelloWorld4"
         )
         self.assertTrue(user.is_superuser)
-        self.assertTrue(user.is_email_verified)
+        self.assertTrue(user.is_verified)
         self.assertTrue(user.is_staff)
         self.assertTrue(user.is_active)
 
@@ -52,7 +52,7 @@ class CustomUserTestCase(TestCase):
         )
         self.assertFalse(user.is_superuser)
         self.assertFalse(user.is_staff)
-        self.assertFalse(user.is_email_verified)
+        self.assertFalse(user.is_verified)
         self.assertTrue(user.is_active)
 
     def test_getting_by_identifier(self):

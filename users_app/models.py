@@ -19,7 +19,7 @@ class CustomUserManager(UserManager):
         """
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_email_verified", False)
+        extra_fields.setdefault("is_verified", False)
         extra_fields.setdefault("is_active", True)
 
         if not email and not phone:
@@ -43,7 +43,7 @@ class CustomUserManager(UserManager):
         """
         extra_fields["is_superuser"] = True
         extra_fields["is_staff"] = True
-        extra_fields["is_email_verified"] = True
+        extra_fields["is_verified"] = True
         extra_fields["is_active"] = True
 
         return self.create_user(email=email, password=password, **extra_fields)
@@ -95,7 +95,7 @@ class CustomUser(AbstractUser):
             "unique": _("A User with that Email already exists."),
         },
     )
-    is_email_verified = models.BooleanField(_("Is Email Verified"), default=False)
+    is_verified = models.BooleanField(_("Is Verified"), default=False)
 
     is_active = models.BooleanField(_("Is Active"), default=True)
 
