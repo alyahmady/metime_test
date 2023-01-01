@@ -19,7 +19,7 @@ from drf_spectacular.views import SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')),
-    path('api-auth/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),
-    path('auth/', include('users_app.urls')),
+    path('api/', include('rest_framework.urls')),
+    path('api/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger'),
+    path('users/', include('users_app.urls')),
 ]
