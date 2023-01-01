@@ -89,7 +89,9 @@ DB_USER = os.getenv("POSTGRES_USER", "metime")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "metime")
 DB_PORT = os.getenv("POSTGRES_PORT", 5432)
 DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
-# DB_CONNECTION_URI = F"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DB_CONNECTION_URI = (
+    f"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
 
 # DATABASES = {
 #     'default': {
@@ -188,9 +190,32 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-
     "TOKEN_OBTAIN_SERIALIZER": "auth_app.serializers.CustomTokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "auth_app.serializers.CustomTokenRefreshSerializer",
 }
 
 AUTHENTICATION_BACKENDS = ["auth_app.backend.CustomUserAuthBackend"]
+
+REDIS_USER = os.getenv("REDIS_USER", "default")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "foobared")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_CONNECTION_URI = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_CONNECTION_URI,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "IGNORE_EXCEPTIONS": False,
+        },
+    }
+}
+
+if REDIS_PASSWORD:
+    CACHES["default"]["OPTIONS"]["PASSWORD"] = REDIS_PASSWORD
+    REDIS_CONNECTION_URI = (
+        f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"
+    )
+    CACHES["default"]["LOCATION"] = REDIS_CONNECTION_URI
