@@ -1,3 +1,6 @@
+from typing import Tuple
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -52,10 +55,11 @@ class CustomUserManager(UserManager):
         field_name, validated_value = self.model.get_user_identifier_field(
             user_identifier
         )
-        if field_name == "email":
-            return self.get_by_email(email=validated_value)
-        elif field_name == "phone":
-            return self.get_by_phone(phone=validated_value)
+        match field_name:
+            case settings.UserIdentifierField.EMAIL:
+                return self.get_by_email(email=validated_value)
+            case settings.UserIdentifierField.PHONE:
+                return self.get_by_phone(phone=validated_value)
 
     def get_by_email(self, email):
         case_insensitive_email_field = "{}__iexact".format(self.model.EMAIL_FIELD)
@@ -128,7 +132,9 @@ class CustomUser(AbstractUser):
         return f"{self.full_name or self.id}"
 
     @classmethod
-    def get_user_identifier_field(cls, user_identifier):
+    def get_user_identifier_field(
+        cls, user_identifier
+    ) -> Tuple[settings.UserIdentifierField, PhoneNumber | str]:
         try:
             phone = to_python(user_identifier)
             if not isinstance(phone, PhoneNumber):
@@ -141,10 +147,15 @@ class CustomUser(AbstractUser):
                     _("The phone number entered is not valid."),
                     code="invalid_phone_number",
                 )
-            return "phone", phone
+            return settings.UserIdentifierField.PHONE, phone
         except:
             try:
                 validate_email(user_identifier)
-                return "email", cls._default_manager.normalize_email(user_identifier)
+                return (
+                    settings.UserIdentifierField.EMAIL,
+                    cls._default_manager.normalize_email(user_identifier),
+                )
             except:
-                raise ValueError
+                raise ValueError(
+                    "Invalid identifier value. Either must be email or phone number"
+                )
