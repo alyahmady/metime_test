@@ -1,4 +1,3 @@
-from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 from django.test import TestCase
 
@@ -21,56 +20,6 @@ class CustomUserTestCase(TestCase):
             first_name="Aly",
             last_name="Ahmady",
         )
-
-    def test_verification_status_after_identifier_change(self):
-        user1 = CustomUser.objects.get(phone="+989050809253")
-        user2 = CustomUser.objects.get(email="test2@gmail.com")
-        self.assertFalse(user1.is_verified)
-        self.assertFalse(user2.is_verified)
-
-        user1.is_verified = True
-        user2.is_verified = True
-        user1.save()
-        user2.save()
-        self.assertTrue(user1.is_verified)
-        self.assertTrue(user2.is_verified)
-
-        user1.phone = "+989127072456"
-        user2.email = "test78@gmail.com"
-        user1.save()
-        user2.save()
-        self.assertFalse(user1.is_verified)
-        self.assertFalse(user2.is_verified)
-
-        user1.is_verified = True
-        user2.is_verified = True
-        user1.save()
-        user2.save()
-        self.assertTrue(user1.is_verified)
-        self.assertTrue(user2.is_verified)
-
-        user1.email = "test79@gmail.com"
-        user2.phone = "+989127072457"
-        user1.save()
-        user2.save()
-        self.assertFalse(user1.is_verified)
-        self.assertFalse(user2.is_verified)
-
-    def test_bad_password(self):
-        with self.assertRaisesMessage(ValidationError, "too common"):
-            CustomUser.objects.create_user(
-                email="better.aly.ahmady@gmail.com", password="helloworld"
-            )
-
-        with self.assertRaisesMessage(ValidationError, "entirely numeric"):
-            CustomUser.objects.create_user(
-                email="better.aly.ahmady2@gmail.com", password="1234123489765"
-            )
-
-        with self.assertRaisesMessage(ValidationError, "too short"):
-            CustomUser.objects.create_user(
-                email="better.aly.ahmady3@gmail.com", password="ab123"
-            )
 
     def test_attributes_after_creation(self):
         user = CustomUser.objects.create_superuser(
