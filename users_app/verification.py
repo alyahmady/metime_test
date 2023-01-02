@@ -5,6 +5,7 @@ from django.contrib.auth import get_user_model
 from django.core.cache import cache
 
 from metime import celery_app
+from metime.settings import UserIdentifierField
 
 
 def activation_key_generator() -> str:
@@ -15,7 +16,7 @@ def activation_key_generator() -> str:
 
 @celery_app.task(ignore_result=True)
 def send_user_verification_code(
-    user: get_user_model(), user_field: settings.UserIdentifierField
+    user: get_user_model(), user_field: UserIdentifierField
 ) -> None:
     if user.is_verified:
         raise ValueError("User is already verified")
@@ -25,13 +26,13 @@ def send_user_verification_code(
         Your verification code is: {activation_key}
     """
 
-    if user_field == settings.UserIdentifierField.EMAIL:
+    if user_field == UserIdentifierField.EMAIL:
         user.email_user(
             subject=settings.VERIFICATION_EMAIL_SUBJECT,
             message=message,
             fail_silently=True,
         )
-    elif user_field == settings.UserIdentifierField.PHONE:
+    elif user_field == UserIdentifierField.PHONE:
         user.sms_user(message=message)
 
     cache.set(
@@ -43,7 +44,7 @@ def send_user_verification_code(
 
 @celery_app.task(ignore_result=True)
 def send_user_reset_password_code(
-    user: get_user_model(), user_field: settings.UserIdentifierField
+    user: get_user_model(), user_field: UserIdentifierField
 ):
     activation_key = activation_key_generator()
 
@@ -51,13 +52,13 @@ def send_user_reset_password_code(
         Your password recovery code is: {activation_key}
     """
 
-    if user_field == settings.UserIdentifierField.EMAIL:
+    if user_field == UserIdentifierField.EMAIL:
         user.email_user(
             subject=settings.FORGOT_PASSWORD_EMAIL_SUBJECT,
             message=message,
             fail_silently=True,
         )
-    elif user_field == settings.UserIdentifierField.PHONE:
+    elif user_field == UserIdentifierField.PHONE:
         user.sms_user(message=message)
 
     cache.set(

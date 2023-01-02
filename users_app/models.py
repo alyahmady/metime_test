@@ -11,6 +11,8 @@ from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import to_python, PhoneNumber
 
+from metime.settings import UserIdentifierField
+
 
 class CustomUserManager(UserManager):
     def create(self, *args, **kwargs):
@@ -56,9 +58,9 @@ class CustomUserManager(UserManager):
             user_identifier
         )
         match field_name:
-            case settings.UserIdentifierField.EMAIL:
+            case UserIdentifierField.EMAIL:
                 return self.get_by_email(email=validated_value)
-            case settings.UserIdentifierField.PHONE:
+            case UserIdentifierField.PHONE:
                 return self.get_by_phone(phone=validated_value)
 
     def get_by_email(self, email):
@@ -153,7 +155,7 @@ class CustomUser(AbstractUser):
     @classmethod
     def get_user_identifier_field(
         cls, user_identifier
-    ) -> Tuple[settings.UserIdentifierField, PhoneNumber | str]:
+    ) -> Tuple[UserIdentifierField, PhoneNumber | str]:
         try:
             phone = to_python(user_identifier)
             if not isinstance(phone, PhoneNumber):
@@ -166,12 +168,12 @@ class CustomUser(AbstractUser):
                     _("The phone number entered is not valid."),
                     code="invalid_phone_number",
                 )
-            return settings.UserIdentifierField.PHONE, phone
+            return UserIdentifierField.PHONE, phone
         except:
             try:
                 validate_email(user_identifier)
                 return (
-                    settings.UserIdentifierField.EMAIL,
+                    UserIdentifierField.EMAIL,
                     cls._default_manager.normalize_email(user_identifier),
                 )
             except:

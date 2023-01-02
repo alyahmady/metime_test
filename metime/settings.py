@@ -232,6 +232,7 @@ else:
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_USER", "password")
     EMAIL_PORT = 587
 
+
 class UserIdentifierField(enum.Enum):
     EMAIL = "email"
     PHONE = "phone"
