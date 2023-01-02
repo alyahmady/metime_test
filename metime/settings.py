@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import enum
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -89,7 +90,9 @@ DB_USER = os.getenv("POSTGRES_USER", "metime")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "metime")
 DB_PORT = os.getenv("POSTGRES_PORT", 5432)
 DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
-# DB_CONNECTION_URI = F"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+DB_CONNECTION_URI = (
+    f"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
 
 # DATABASES = {
 #     'default': {
@@ -134,7 +137,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = os.getenv("TIME_ZONE", "UTC")
 
 USE_I18N = True
 
@@ -188,9 +191,59 @@ SIMPLE_JWT = {
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-
     "TOKEN_OBTAIN_SERIALIZER": "auth_app.serializers.CustomTokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "auth_app.serializers.CustomTokenRefreshSerializer",
 }
 
 AUTHENTICATION_BACKENDS = ["auth_app.backend.CustomUserAuthBackend"]
+
+REDIS_USER = os.getenv("REDIS_USER", "default")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "foobared")
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = os.getenv("REDIS_PORT", "6379")
+REDIS_CONNECTION_URI = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_CONNECTION_URI,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "IGNORE_EXCEPTIONS": False,
+        },
+    }
+}
+
+if REDIS_PASSWORD:
+    CACHES["default"]["OPTIONS"]["PASSWORD"] = REDIS_PASSWORD
+    REDIS_CONNECTION_URI = (
+        f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"
+    )
+    CACHES["default"]["LOCATION"] = REDIS_CONNECTION_URI
+
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    DEFAULT_FROM_EMAIL = "Default@MeTime.com"
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "test@gmail.com")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_USER", "password")
+    EMAIL_PORT = 587
+
+
+class UserIdentifierField(enum.Enum):
+    EMAIL = "email"
+    PHONE = "phone"
+
+
+VERIFICATION_CODE_DIGITS_COUNT = 6
+
+VERIFICATION_EMAIL_SUBJECT = "MeTime | Account Verification"
+VERIFICATION_CACHE_KEY = "METIME-{}-verify-key"
+VERIFICATION_TIMEOUT = 43200
+
+RESET_PASSWORD_EMAIL_SUBJECT = "MeTime | Password Recovery"
+RESET_PASSWORD_CACHE_KEY = "METIME-{}-forgot-password"
+RESET_PASSWORD_TIMEOUT = 43200

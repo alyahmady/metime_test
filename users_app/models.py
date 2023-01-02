@@ -1,3 +1,6 @@
+from typing import Tuple
+
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -7,6 +10,8 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import to_python, PhoneNumber
+
+from metime.settings import UserIdentifierField
 
 
 class CustomUserManager(UserManager):
@@ -19,7 +24,7 @@ class CustomUserManager(UserManager):
         """
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_email_verified", False)
+        extra_fields.setdefault("is_verified", False)
         extra_fields.setdefault("is_active", True)
 
         if not email and not phone:
@@ -43,7 +48,7 @@ class CustomUserManager(UserManager):
         """
         extra_fields["is_superuser"] = True
         extra_fields["is_staff"] = True
-        extra_fields["is_email_verified"] = True
+        extra_fields["is_verified"] = True
         extra_fields["is_active"] = True
 
         return self.create_user(email=email, password=password, **extra_fields)
@@ -52,10 +57,11 @@ class CustomUserManager(UserManager):
         field_name, validated_value = self.model.get_user_identifier_field(
             user_identifier
         )
-        if field_name == "email":
-            return self.get_by_email(email=validated_value)
-        elif field_name == "phone":
-            return self.get_by_phone(phone=validated_value)
+        match field_name:
+            case UserIdentifierField.EMAIL:
+                return self.get_by_email(email=validated_value)
+            case UserIdentifierField.PHONE:
+                return self.get_by_phone(phone=validated_value)
 
     def get_by_email(self, email):
         case_insensitive_email_field = "{}__iexact".format(self.model.EMAIL_FIELD)
@@ -95,8 +101,11 @@ class CustomUser(AbstractUser):
             "unique": _("A User with that Email already exists."),
         },
     )
-    is_email_verified = models.BooleanField(_("Is Email Verified"), default=False)
+    __original_phone = None
+    __original_email = None
 
+    # Flag fields
+    is_verified = models.BooleanField(_("Is Verified"), default=False)
     is_active = models.BooleanField(_("Is Active"), default=True)
 
     USERNAME_FIELD = "email"
@@ -124,11 +133,29 @@ class CustomUser(AbstractUser):
             )
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # To keep last values before calling super().save() -> to detect updates without DB call
+        self.__original_phone = self.phone
+        self.__original_email = self.email
+
+    def save(self, *args, **kwargs):
+        if self.phone != self.__original_phone or self.email != self.__original_email:
+            self.is_verified = False
+
+        super().save(*args, **kwargs)
+
+        self.__original_email = self.email
+        self.__original_phone = self.phone
+
     def __str__(self):
         return f"{self.full_name or self.id}"
 
     @classmethod
-    def get_user_identifier_field(cls, user_identifier):
+    def get_user_identifier_field(
+        cls, user_identifier
+    ) -> Tuple[UserIdentifierField, PhoneNumber | str]:
         try:
             phone = to_python(user_identifier)
             if not isinstance(phone, PhoneNumber):
@@ -141,10 +168,19 @@ class CustomUser(AbstractUser):
                     _("The phone number entered is not valid."),
                     code="invalid_phone_number",
                 )
-            return "phone", phone
+            return UserIdentifierField.PHONE, phone
         except:
             try:
                 validate_email(user_identifier)
-                return "email", cls._default_manager.normalize_email(user_identifier)
+                return (
+                    UserIdentifierField.EMAIL,
+                    cls._default_manager.normalize_email(user_identifier),
+                )
             except:
-                raise ValueError
+                raise ValueError(
+                    "Invalid identifier value. Either must be email or phone number"
+                )
+
+    def sms_user(self, message, from_number=None, **kwargs):
+        # TODO -> Not implemented yet
+        print(message)

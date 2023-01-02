@@ -28,8 +28,8 @@ class CustomUserAuthBackend(ModelBackend):
         Reject users with is_active=False or is_verified=False.
         """
         is_active = getattr(user, "is_active", False)
-        is_email_verified = getattr(user, "is_email_verified", False)
-        return is_active and is_email_verified
+        is_verified = getattr(user, "is_verified", False)
+        return is_active and is_verified
 
 
 class CustomJWTAuthentication(JWTAuthentication):
@@ -52,7 +52,7 @@ class CustomJWTAuthentication(JWTAuthentication):
         if not user.is_active:
             raise AuthenticationFailed(_("User is inactive"), code="user_inactive")
 
-        if not user.is_email_verified:
+        if not user.is_verified:
             raise AuthenticationFailed(
                 _("User is not verified"), code="user_not_verified"
             )
