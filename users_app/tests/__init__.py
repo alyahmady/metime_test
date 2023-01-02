@@ -1,2 +1,3 @@
 from .models import CustomUserTestCase
-from .verification import VerificationTestCase
+from .verification import CustomUserVerificationTestCase
+from .password import CustomUserPasswordTestCase
