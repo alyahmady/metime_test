@@ -24,10 +24,10 @@ class CustomTokenObtainSerializer(serializers.Serializer):
         self.user = None
 
         self.fields[self.email_field] = serializers.EmailField(
-            allow_null=True, allow_blank=False
+            allow_null=True, allow_blank=False, required=False
         )
         self.fields[self.phone_field] = PhoneNumberField(
-            allow_null=True, allow_blank=False
+            allow_null=True, allow_blank=False, required=False
         )
         self.fields["password"] = PasswordField()
 
