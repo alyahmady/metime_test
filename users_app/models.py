@@ -159,3 +159,7 @@ class CustomUser(AbstractUser):
                 raise ValueError(
                     "Invalid identifier value. Either must be email or phone number"
                 )
+
+    def sms_user(self, message, from_number=None, **kwargs):
+        # TODO -> Not implemented yet
+        print(message)
