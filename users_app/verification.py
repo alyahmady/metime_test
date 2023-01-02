@@ -54,7 +54,7 @@ def send_user_reset_password_code(
 
     if user_field == UserIdentifierField.EMAIL:
         user.email_user(
-            subject=settings.FORGOT_PASSWORD_EMAIL_SUBJECT,
+            subject=settings.RESET_PASSWORD_EMAIL_SUBJECT,
             message=message,
             fail_silently=True,
         )
@@ -62,7 +62,7 @@ def send_user_reset_password_code(
         user.sms_user(message=message)
 
     cache.set(
-        key=settings.FORGOT_PASSWORD_CACHE_KEY.format(str(user.id)),
+        key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user.id)),
         value=activation_key,
-        timeout=settings.FORGOT_PASSWORD_TIMEOUT,
+        timeout=settings.RESET_PASSWORD_TIMEOUT,
     )

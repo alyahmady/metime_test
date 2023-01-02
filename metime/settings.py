@@ -236,3 +236,14 @@ else:
 class UserIdentifierField(enum.Enum):
     EMAIL = "email"
     PHONE = "phone"
+
+
+VERIFICATION_CODE_DIGITS_COUNT = 6
+
+VERIFICATION_EMAIL_SUBJECT = "MeTime | Account Verification"
+VERIFICATION_CACHE_KEY = "METIME-{}-verify-key"
+VERIFICATION_TIMEOUT = 43200
+
+RESET_PASSWORD_EMAIL_SUBJECT = "MeTime | Password Recovery"
+RESET_PASSWORD_CACHE_KEY = "METIME-{}-forgot-password"
+RESET_PASSWORD_TIMEOUT = 43200
