@@ -99,8 +99,11 @@ class CustomUser(AbstractUser):
             "unique": _("A User with that Email already exists."),
         },
     )
-    is_verified = models.BooleanField(_("Is Verified"), default=False)
+    __original_phone = None
+    __original_email = None
 
+    # Flag fields
+    is_verified = models.BooleanField(_("Is Verified"), default=False)
     is_active = models.BooleanField(_("Is Active"), default=True)
 
     USERNAME_FIELD = "email"
@@ -127,6 +130,22 @@ class CustomUser(AbstractUser):
                 name="email_phone_null",
             )
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # To keep last values before calling super().save() -> to detect updates without DB call
+        self.__original_phone = self.phone
+        self.__original_email = self.email
+
+    def save(self, *args, **kwargs):
+        if self.phone != self.__original_phone or self.email != self.__original_email:
+            self.is_verified = False
+
+        super().save(*args, **kwargs)
+
+        self.__original_email = self.email
+        self.__original_phone = self.phone
 
     def __str__(self):
         return f"{self.full_name or self.id}"
