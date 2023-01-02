@@ -80,6 +80,11 @@ class CustomUser(AbstractUser):
     username = None
     create_date = None
 
+    # Datetime fields
+    last_password_change = models.DateTimeField(
+        _("Last Password Change"), null=True, default=None
+    )
+
     # Profile data fields
     first_name = models.CharField(_("First Name"), max_length=50, null=True)
     last_name = models.CharField(_("Last Name"), max_length=100, null=True)
