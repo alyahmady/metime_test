@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/4.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
+import enum
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -230,3 +231,7 @@ else:
     EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "test@gmail.com")
     EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_USER", "password")
     EMAIL_PORT = 587
+
+class UserIdentifierField(enum.Enum):
+    EMAIL = "email"
+    PHONE = "phone"
