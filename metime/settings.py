@@ -219,3 +219,14 @@ if REDIS_PASSWORD:
         f"redis://{REDIS_USER}:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/0"
     )
     CACHES["default"]["LOCATION"] = REDIS_CONNECTION_URI
+
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+else:
+    DEFAULT_FROM_EMAIL = "Default@MeTime.com"
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = "smtp.gmail.com"
+    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "test@gmail.com")
+    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_USER", "password")
+    EMAIL_PORT = 587
