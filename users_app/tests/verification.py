@@ -1,11 +1,11 @@
 from django.conf import settings
-from django.core.cache import cache
 from django.test import TestCase
 
 from users_app.models import CustomUser
 from users_app.otp import (
     activation_key_generator,
     send_user_verification_code,
+    get_user_verification_code,
 )
 
 
@@ -51,12 +51,8 @@ class CustomUserVerificationTestCase(TestCase):
             user_identifier=user2.email,
         )
 
-        code1 = cache.get(
-            key=settings.VERIFICATION_CACHE_KEY.format(str(user1.id)),
-        )
-        code2 = cache.get(
-            key=settings.VERIFICATION_CACHE_KEY.format(str(user2.id)),
-        )
+        code1 = get_user_verification_code(user1.id)
+        code2 = get_user_verification_code(user2.id)
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())

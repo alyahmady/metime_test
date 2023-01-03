@@ -18,6 +18,32 @@ def activation_key_generator() -> str:
     return code.rjust(settings.VERIFICATION_CODE_DIGITS_COUNT, "0")
 
 
+def get_user_verification_code(user_id: str | int | UUID):
+    code = cache.get(
+        key=settings.VERIFICATION_CACHE_KEY.format(str(user_id)),
+    )
+
+    if isinstance(code, bytes):
+        code = code.decode()
+    if isinstance(code, int):
+        code = str(code).rjust(settings.VERIFICATION_CODE_DIGITS_COUNT, "0")
+
+    return code
+
+
+def get_user_reset_password_code(user_id: str | int | UUID):
+    code = cache.get(
+        key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user_id)),
+    )
+
+    if isinstance(code, bytes):
+        code = code.decode()
+    if isinstance(code, int):
+        code = str(code).rjust(settings.VERIFICATION_CODE_DIGITS_COUNT, "0")
+
+    return code
+
+
 @celery_app.task(ignore_result=True)
 def send_user_verification_code(
     is_verified: bool,
