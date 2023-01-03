@@ -181,18 +181,18 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "metime.permissions.IsAdminUser",
     ],
-    "DEFAULT_THROTTLE_CLASSES": {
+    "DEFAULT_THROTTLE_CLASSES": (
         "rest_framework.throttling.AnonRateThrottle",
         "rest_framework.throttling.UserRateThrottle",
         "rest_framework.throttling.ScopedRateThrottle",
-    },
+    ),
     "DEFAULT_THROTTLE_RATES": {
         "anon": "100/day",
         "user": "1000/day",
-        "user_register": "50/day",
-        "user_update": "150/day",
-        "token_obtain": "50/day",
-        "token_refresh": "1/day",
+        "user_register": "100/day",
+        "user_update": "300/day",
+        "token_obtain": "100/day",
+        "token_refresh": "10/day",
     },
 }
 
