@@ -9,7 +9,7 @@ class CeleryConfigurations:
     # SET WITH DEBUG TO NOT REPORT GRANULARITY IN PRODUCTION
     task_track_started = settings.DEBUG
     task_time_limit = 60  # seconds
-    result_backend = settings.DB_CONNECTION_URI
+    result_backend = settings.REDIS_CONNECTION_URI
     broker_url = settings.REDIS_CONNECTION_URI
 
     task_routes = None
