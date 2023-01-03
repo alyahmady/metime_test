@@ -32,6 +32,10 @@ class UserRegisterAPITestCase(APITestCase):
         self.assertIn("date_joined", response.data)
         self.assertIn("is_active", response.data)
         self.assertIn("is_verified", response.data)
+        self.assertIn("phone", response.data)
+        self.assertIn("email", response.data)
+        self.assertIn("first_name", response.data)
+        self.assertIn("last_name", response.data)
 
         self.assertTrue(response.data["is_active"])
         self.assertFalse(response.data["is_verified"])
