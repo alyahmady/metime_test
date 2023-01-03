@@ -181,9 +181,18 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAdminUser",
     ],
+    "DEFAULT_THROTTLE_CLASSES": {
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    },
     "DEFAULT_THROTTLE_RATES": {
+        "anon": "100/day",
+        "user": "1000/day",
         "user_register": "50/day",
         "user_update": "150/day",
+        "token_obtain": "50/day",
+        "token_refresh": "1/day",
     },
 }
 
@@ -218,7 +227,7 @@ CACHES = {
         },
         "KEY_FUNCTION": "metime.redis.make_key",
         "KEY_PREFIX": "METIME",
-        "VERSION": 1
+        "VERSION": 1,
     }
 }
 
