@@ -183,6 +183,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "user_register": "50/day",
+        "user_update": "150/day",
     },
 }
 
