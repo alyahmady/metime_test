@@ -3,6 +3,8 @@ import os
 from celery import Celery
 from django.conf import settings
 
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "metime.settings")
+
 
 class CeleryConfigurations:
     timezone = settings.TIME_ZONE
@@ -16,12 +18,8 @@ class CeleryConfigurations:
     task_queues = None
     task_create_missing_queues = True
     task_default_queue = "metime_celery"
-    imports = [
-        'users_app.verification'
-    ]
+    imports = ["users_app.otp"]
 
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "metime.settings")
 
 celery_app = Celery("metime")
 celery_app.config_from_object(CeleryConfigurations)
