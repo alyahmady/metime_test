@@ -44,7 +44,7 @@ class UserSerializer(serializers.ModelSerializer):
             if user.email:
                 verification_kwargs["user_identifier"] = user.email
             elif user.phone:
-                verification_kwargs["user_identifier"] = user.phone
+                verification_kwargs["user_identifier"] = user.phone.as_e164
 
             send_user_verification_code.apply_async(kwargs=verification_kwargs)
 
