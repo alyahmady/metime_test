@@ -43,10 +43,11 @@ def send_user_verification_code(
     elif user_field == UserIdentifierField.PHONE:
         CustomUser.sms_user(phone=user_identifier.as_e164, message=message)
 
-    cache.set(
-        key=settings.VERIFICATION_CACHE_KEY.format(str(user_id)),
+    redis_client = get_redis_client()
+    redis_client.client().setex(
+        name=settings.VERIFICATION_CACHE_KEY.format(str(user_id)),
         value=activation_key,
-        timeout=settings.VERIFICATION_TIMEOUT,
+        time=settings.VERIFICATION_TIMEOUT,
     )
 
 
@@ -73,8 +74,9 @@ def send_user_reset_password_code(
     elif user_field == UserIdentifierField.PHONE:
         CustomUser.sms_user(phone=user_identifier.as_e164, message=message)
 
-    cache.set(
-        key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user_id)),
+    redis_client = get_redis_client()
+    redis_client.setex(
+        name=settings.RESET_PASSWORD_CACHE_KEY.format(str(user_id)),
         value=activation_key,
-        timeout=settings.RESET_PASSWORD_TIMEOUT,
+        time=settings.RESET_PASSWORD_TIMEOUT,
     )
