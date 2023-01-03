@@ -63,16 +63,17 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         data = validated_data.copy()
-        for key in ("password", "password_confirm"):
-            if key not in data:
-                raise ValidationError(f"`{key}` field is required")
 
         if "email" not in data and "phone" not in data:
             raise ValidationError(
                 "Either `phone` or `email` fields must be in the request payload"
             )
 
-        password = data.pop("password")
+        try:
+            password = data.pop("password")
+        except LookupError:
+            raise ValidationError(f"`password` field is required")
+
         with transaction.atomic():
             # Register user and set password
             instance = CustomUser(**data)
