@@ -1,6 +1,5 @@
 from typing import Tuple
 
-from django.conf import settings
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -194,6 +193,7 @@ class CustomUser(AbstractUser):
                     "Invalid identifier value. Either must be email or phone number"
                 )
 
-    def sms_user(self, message, from_number=None, **kwargs):
+    @classmethod
+    def sms_user(cls, phone, message, from_number=None, **kwargs):
         # TODO -> Not implemented yet
         print(message)

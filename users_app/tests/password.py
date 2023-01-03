@@ -1,15 +1,14 @@
 import datetime
 
 from django.conf import settings
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 
-from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 from users_app.otp import (
     send_user_reset_password_code,
+    get_user_reset_password_code,
 )
 
 
@@ -93,15 +92,11 @@ class CustomUserPasswordTestCase(TestCase):
         user1.save()
         user2.save()
 
-        send_user_reset_password_code(user=user1, user_field=UserIdentifierField.PHONE)
-        send_user_reset_password_code(user=user2, user_field=UserIdentifierField.EMAIL)
+        send_user_reset_password_code(user_id=user1.id, user_identifier=user1.phone)
+        send_user_reset_password_code(user_id=user2.id, user_identifier=user2.email)
 
-        code1 = cache.get(
-            key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user1.id)),
-        )
-        code2 = cache.get(
-            key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user2.id)),
-        )
+        code1 = get_user_reset_password_code(user1.id)
+        code2 = get_user_reset_password_code(user2.id)
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())

@@ -90,9 +90,9 @@ DB_USER = os.getenv("POSTGRES_USER", "metime")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "metime")
 DB_PORT = os.getenv("POSTGRES_PORT", 5432)
 DB_HOST = os.getenv("POSTGRES_HOST", "localhost")
-DB_CONNECTION_URI = (
-    f"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+# DB_CONNECTION_URI = (
+#     f"db+postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+# )
 
 # DATABASES = {
 #     'default': {
@@ -181,6 +181,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAdminUser",
     ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user_register": "50/day",
+    },
 }
 
 PHONENUMBER_DEFAULT_REGION = os.getenv("PHONENUMBER_DEFAULT_REGION", "IR")
@@ -212,6 +215,9 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "IGNORE_EXCEPTIONS": False,
         },
+        "KEY_FUNCTION": "metime.redis.make_key",
+        "KEY_PREFIX": "METIME",
+        "VERSION": 1
     }
 }
 
@@ -242,9 +248,9 @@ class UserIdentifierField(enum.Enum):
 VERIFICATION_CODE_DIGITS_COUNT = 6
 
 VERIFICATION_EMAIL_SUBJECT = "MeTime | Account Verification"
-VERIFICATION_CACHE_KEY = "METIME-{}-verify-key"
+VERIFICATION_CACHE_KEY = "{}-VERIFY-KEY"
 VERIFICATION_TIMEOUT = 43200
 
 RESET_PASSWORD_EMAIL_SUBJECT = "MeTime | Password Recovery"
-RESET_PASSWORD_CACHE_KEY = "METIME-{}-forgot-password"
+RESET_PASSWORD_CACHE_KEY = "{}-RESET-PASS"
 RESET_PASSWORD_TIMEOUT = 43200
