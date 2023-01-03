@@ -7,6 +7,7 @@ from django.core.mail import send_mail
 from phonenumbers import PhoneNumber
 
 from metime import celery_app
+from metime.redis import get_redis_client
 from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 
@@ -45,7 +46,7 @@ def send_user_verification_code(
 
     redis_client = get_redis_client()
     redis_client.client().setex(
-        name=settings.VERIFICATION_CACHE_KEY.format(str(user_id)),
+        name=cache.make_key(settings.VERIFICATION_CACHE_KEY.format(str(user_id))),
         value=activation_key,
         time=settings.VERIFICATION_TIMEOUT,
     )
@@ -76,7 +77,7 @@ def send_user_reset_password_code(
 
     redis_client = get_redis_client()
     redis_client.setex(
-        name=settings.RESET_PASSWORD_CACHE_KEY.format(str(user_id)),
+        name=cache.make_key(settings.RESET_PASSWORD_CACHE_KEY.format(str(user_id))),
         value=activation_key,
         time=settings.RESET_PASSWORD_TIMEOUT,
     )
