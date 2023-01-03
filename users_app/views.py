@@ -2,7 +2,7 @@ from django.db import transaction
 from rest_framework import viewsets, permissions
 
 from users_app.models import CustomUser
-from users_app.permissions import Forbidden
+from metime.permissions import Forbidden
 from users_app.serializers import UserSerializer
 
 
