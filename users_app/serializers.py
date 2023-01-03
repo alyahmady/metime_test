@@ -41,13 +41,13 @@ class UserSerializer(serializers.ModelSerializer):
     def _user_verification_process(self, user: CustomUser):
         # Send verification code
         if not user.is_verified:
-            verification_kwargs = {"user": user}
+            verification_kwargs = {"is_verified": user.is_verified, "user_id": user.id}
             if user.email:
-                verification_kwargs["user_field"] = UserIdentifierField.EMAIL
+                verification_kwargs["user_identifier"] = user.email
             elif user.phone:
-                verification_kwargs["user_field"] = UserIdentifierField.PHONE
+                verification_kwargs["user_identifier"] = user.phone
 
-            send_user_verification_code.apply_async(kwargs=verification_kwargs)
+            send_user_verification_code.delay(**verification_kwargs)
 
     def validate(self, data):
         data = super(UserSerializer, self).validate(data)

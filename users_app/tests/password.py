@@ -93,8 +93,8 @@ class CustomUserPasswordTestCase(TestCase):
         user1.save()
         user2.save()
 
-        send_user_reset_password_code(user=user1, user_field=UserIdentifierField.PHONE)
-        send_user_reset_password_code(user=user2, user_field=UserIdentifierField.EMAIL)
+        send_user_reset_password_code(user_id=user1.id, user_identifier=user1.phone)
+        send_user_reset_password_code(user_id=user2.id, user_identifier=user2.email)
 
         code1 = cache.get(
             key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user1.id)),

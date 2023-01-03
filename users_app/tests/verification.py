@@ -2,7 +2,6 @@ from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase
 
-from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 from users_app.otp import (
     activation_key_generator,
@@ -27,7 +26,11 @@ class CustomUserVerificationTestCase(TestCase):
         user.save()
 
         with self.assertRaisesMessage(ValueError, "already verified"):
-            send_user_verification_code(user=user, user_field=UserIdentifierField.PHONE)
+            send_user_verification_code(
+                is_verified=user.is_verified,
+                user_id=user.id,
+                user_identifier=user.phone,
+            )
 
     def test_verification_code_in_cache_existence(self):
         user1 = CustomUser.objects.get(phone="+989101397261")
@@ -37,8 +40,16 @@ class CustomUserVerificationTestCase(TestCase):
         user1.save()
         user2.save()
 
-        send_user_verification_code(user=user1, user_field=UserIdentifierField.PHONE)
-        send_user_verification_code(user=user2, user_field=UserIdentifierField.EMAIL)
+        send_user_verification_code(
+            is_verified=user1.is_verified,
+            user_id=user1.id,
+            user_identifier=user1.phone,
+        )
+        send_user_verification_code(
+            is_verified=user2.is_verified,
+            user_id=user2.id,
+            user_identifier=user2.email,
+        )
 
         code1 = cache.get(
             key=settings.VERIFICATION_CACHE_KEY.format(str(user1.id)),
