@@ -4,7 +4,6 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 from users_app.otp import send_user_verification_code
 
@@ -47,7 +46,7 @@ class UserSerializer(serializers.ModelSerializer):
             elif user.phone:
                 verification_kwargs["user_identifier"] = user.phone
 
-            send_user_verification_code.delay(**verification_kwargs)
+            send_user_verification_code.apply_async(kwargs=verification_kwargs)
 
     def validate(self, data):
         data = super(UserSerializer, self).validate(data)
