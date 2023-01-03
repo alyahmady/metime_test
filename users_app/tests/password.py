@@ -92,11 +92,11 @@ class CustomUserPasswordTestCase(TestCase):
         user1.save()
         user2.save()
 
-        send_user_reset_password_code(user_id=user1.id, user_identifier=user1.phone)
-        send_user_reset_password_code(user_id=user2.id, user_identifier=user2.email)
+        send_user_reset_password_code(user_id=user1.pk, user_identifier=user1.phone)
+        send_user_reset_password_code(user_id=user2.pk, user_identifier=user2.email)
 
-        code1 = get_user_reset_password_code(user1.id)
-        code2 = get_user_reset_password_code(user2.id)
+        code1 = get_user_reset_password_code(user1.pk)
+        code2 = get_user_reset_password_code(user2.pk)
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())

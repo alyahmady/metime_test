@@ -34,13 +34,13 @@ class CustomUserVerificationTestCase(TestCase):
         with self.assertRaisesMessage(ValueError, "already verified"):
             send_user_verification_code(
                 is_verified=self.user1.is_verified,
-                user_id=self.user1.id,
+                user_id=self.user1.pk,
                 user_identifier=self.user1.phone,
             )
         with self.assertRaisesMessage(ValueError, "already verified"):
             send_user_verification_code(
                 is_verified=self.user2.is_verified,
-                user_id=self.user2.id,
+                user_id=self.user2.pk,
                 user_identifier=self.user2.phone,
             )
 
@@ -56,17 +56,17 @@ class CustomUserVerificationTestCase(TestCase):
 
         send_user_verification_code(
             is_verified=self.user1.is_verified,
-            user_id=self.user1.id,
+            user_id=self.user1.pk,
             user_identifier=self.user1.phone,
         )
         send_user_verification_code(
             is_verified=self.user2.is_verified,
-            user_id=self.user2.id,
+            user_id=self.user2.pk,
             user_identifier=self.user2.email,
         )
 
-        code1 = get_user_verification_code(self.user1.id)
-        code2 = get_user_verification_code(self.user2.id)
+        code1 = get_user_verification_code(self.user1.pk)
+        code2 = get_user_verification_code(self.user2.pk)
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())

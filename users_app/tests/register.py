@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from users_app.otp import get_user_verification_code
 
 
-class RegisterAPITestCase(APITestCase):
+class UserRegisterAPITestCase(APITestCase):
     def setUp(self):
         self.user_register_url = reverse("user-register")
 

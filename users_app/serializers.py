@@ -40,7 +40,7 @@ class UserSerializer(serializers.ModelSerializer):
     def _user_verification_process(self, user: CustomUser):
         # Send verification code
         if not user.is_verified:
-            verification_kwargs = {"is_verified": user.is_verified, "user_id": user.id}
+            verification_kwargs = {"is_verified": user.is_verified, "user_id": user.pk}
             if user.email:
                 verification_kwargs["user_identifier"] = user.email
             elif user.phone:
