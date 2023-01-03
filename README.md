@@ -1,3 +1,5 @@
 # metime_test
 
 DATABASE USER AND DB CREATION
+
+CELERY `--pool=solo` FOR WINDOWS DEVELOPMENT

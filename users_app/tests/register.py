@@ -6,7 +6,7 @@ from rest_framework.test import APITestCase
 from users_app.otp import get_user_verification_code
 
 
-class RegisterAPITestCase(APITestCase):
+class UserRegisterAPITestCase(APITestCase):
     def setUp(self):
         self.user_register_url = reverse("user-register")
 
@@ -32,6 +32,10 @@ class RegisterAPITestCase(APITestCase):
         self.assertIn("date_joined", response.data)
         self.assertIn("is_active", response.data)
         self.assertIn("is_verified", response.data)
+        self.assertIn("phone", response.data)
+        self.assertIn("email", response.data)
+        self.assertIn("first_name", response.data)
+        self.assertIn("last_name", response.data)
 
         self.assertTrue(response.data["is_active"])
         self.assertFalse(response.data["is_verified"])

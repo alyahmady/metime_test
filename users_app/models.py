@@ -162,7 +162,7 @@ class CustomUser(AbstractUser):
             self.last_password_change = timezone.now()
 
     def __str__(self):
-        return f"{self.full_name or self.id}"
+        return f"{self.full_name or self.pk}"
 
     @classmethod
     def get_user_identifier_field(

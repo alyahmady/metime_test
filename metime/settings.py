@@ -179,10 +179,20 @@ REST_FRAMEWORK = {
         "auth_app.backend.CustomJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAdminUser",
+        "metime.permissions.IsAdminUser",
     ],
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.ScopedRateThrottle",
+    ),
     "DEFAULT_THROTTLE_RATES": {
-        "user_register": "50/day",
+        "anon": "100/day",
+        "user": "1000/day",
+        "user_register": "100/day",
+        "user_update": "300/day",
+        "token_obtain": "100/day",
+        "token_refresh": "10/day",
     },
 }
 
@@ -217,7 +227,7 @@ CACHES = {
         },
         "KEY_FUNCTION": "metime.redis.make_key",
         "KEY_PREFIX": "METIME",
-        "VERSION": 1
+        "VERSION": 1,
     }
 }
 

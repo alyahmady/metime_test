@@ -199,3 +199,18 @@ class LoginAPITestCase(APITestCase):
 
         self.assertTrue(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("refresh", response.data)
+
+    def test_inactive_user_token_obtain_error(self):
+        self.user1.is_active = False
+        self.user1.save()
+
+        response = self.client.post(
+            self.token_obtain_pair_url,
+            {"phone": self.user1.phone.as_e164, "password": "HelloWorld1"},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+        self.user1.is_active = True
+        self.user1.save()
