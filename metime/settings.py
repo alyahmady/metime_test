@@ -179,7 +179,7 @@ REST_FRAMEWORK = {
         "auth_app.backend.CustomJWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAdminUser",
+        "metime.permissions.IsAdminUser",
     ],
     "DEFAULT_THROTTLE_CLASSES": {
         "rest_framework.throttling.AnonRateThrottle",
