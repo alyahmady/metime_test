@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.test import TestCase
 
@@ -64,6 +66,42 @@ class CustomUserVerificationTestCase(TestCase):
             user_id=self.user2.pk,
             user_identifier=self.user2.email,
         )
+
+        code1 = get_user_verification_code(self.user1.pk)
+        code2 = get_user_verification_code(self.user2.pk)
+
+        self.assertIsInstance(code1, str)
+        self.assertTrue(code1.isdigit())
+        self.assertEqual(len(code1), settings.VERIFICATION_CODE_DIGITS_COUNT)
+
+        self.assertIsInstance(code2, str)
+        self.assertTrue(code2.isdigit())
+        self.assertEqual(len(code2), settings.VERIFICATION_CODE_DIGITS_COUNT)
+
+
+    def test_async_verification_code_in_cache_existence(self):
+        self.assertFalse(self.user1.is_verified)
+        self.assertFalse(self.user2.is_verified)
+
+        task1 = send_user_verification_code.apply_async(kwargs={
+            "is_verified": self.user1.is_verified,
+            "user_id": self.user1.pk,
+            "user_identifier": self.user1.phone.as_e164,
+        })
+        task2 = send_user_verification_code.apply_async(kwargs={
+            "is_verified": self.user2.is_verified,
+            "user_id": self.user2.pk,
+            "user_identifier": self.user2.email,
+        })
+
+        time.sleep(2)
+
+        if settings.DEBUG:
+            self.assertEqual(task1.status, "SUCCESS")
+            self.assertEqual(task2.status, "SUCCESS")
+        else:
+            self.assertEqual(task1.status, "PENDING")
+            self.assertEqual(task2.status, "PENDING")
 
         code1 = get_user_verification_code(self.user1.pk)
         code2 = get_user_verification_code(self.user2.pk)
