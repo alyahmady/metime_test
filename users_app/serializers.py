@@ -81,3 +81,25 @@ class UserSerializer(serializers.ModelSerializer):
 
         self._user_verification_process(user=instance)
         return instance
+
+    def update(self, instance: CustomUser, validated_data):
+        data = validated_data.copy()
+
+        # Purge extra data
+        for key in ("password", "password_confirm"):
+            if key in data:
+                data.pop(key)
+
+        # Set profile data
+        for attribute, new_value in data.items():
+            if not hasattr(instance, attribute):
+                raise ValidationError("Invalid input data")
+
+            if (new_value is not None) and (new_value != ""):
+                if new_value != getattr(instance, attribute, None):
+                    setattr(instance, attribute, new_value)
+
+        instance.save()
+
+        self._user_verification_process(user=instance)
+        return instance
