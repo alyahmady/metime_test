@@ -25,6 +25,10 @@ class UserViewSet(viewsets.ModelViewSet):
             return [permissions.AllowAny()]
         return [Forbidden()]
 
-    def perform_create(self, serializer, **kwargs):
+    def perform_create(self, serializer):
         with transaction.atomic():
-            return serializer.save(**kwargs)
+            return serializer.save()
+
+    def perform_update(self, serializer):
+        with transaction.atomic():
+            serializer.save()
