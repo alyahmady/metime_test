@@ -2,6 +2,7 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
+from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import (
@@ -22,12 +23,20 @@ class AuthHelper:
 class CustomUserAuthBackend(AuthHelper, ModelBackend):
     UserModel = get_user_model()
 
-    def authenticate(self, request, phone=None, email=None, password=None):
+    def authenticate(self, request, email=None, password=None, phone=None, **kwargs):
         if not phone and not email:
-            return None
+            if "username" in kwargs:
+                email = kwargs.pop("username")
+            else:
+                return None
 
         try:
-            user = self.UserModel._default_manager.get(phone=phone, email=email)
+            login_conditions = Q()
+            if email:
+                login_conditions = login_conditions | Q(email=email)
+            if phone:
+                login_conditions = login_conditions | Q(phone=phone)
+            user = self.UserModel._default_manager.get(login_conditions)
         except self.UserModel.DoesNotExist:
             return None
 
