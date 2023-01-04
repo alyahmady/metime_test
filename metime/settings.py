@@ -258,7 +258,7 @@ class UserIdentifierField(enum.Enum):
 VERIFICATION_CODE_DIGITS_COUNT = 6
 
 VERIFICATION_EMAIL_SUBJECT = "MeTime | Account Verification"
-VERIFICATION_CACHE_KEY = "{}-VERIFY-KEY"
+VERIFICATION_CACHE_KEY = "{user_id}-{identifier_field}-VERIFY-KEY"
 VERIFICATION_TIMEOUT = 43200
 
 RESET_PASSWORD_EMAIL_SUBJECT = "MeTime | Password Recovery"

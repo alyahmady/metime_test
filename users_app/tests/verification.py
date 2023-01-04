@@ -3,6 +3,7 @@ import time
 from django.conf import settings
 from django.test import TestCase
 
+from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 from users_app.otp import (
     activation_key_generator,
@@ -69,8 +70,12 @@ class CustomUserVerificationTestCase(TestCase):
             user_identifier=self.user2.email,
         )
 
-        code1 = get_user_verification_code(self.user1.pk)
-        code2 = get_user_verification_code(self.user2.pk)
+        code1 = get_user_verification_code(
+            user_id=self.user1.pk, identifier_field=UserIdentifierField.PHONE
+        )
+        code2 = get_user_verification_code(
+            user_id=self.user2.pk, identifier_field=UserIdentifierField.EMAIL
+        )
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())
@@ -108,8 +113,12 @@ class CustomUserVerificationTestCase(TestCase):
             self.assertEqual(task1.status, "PENDING")
             self.assertEqual(task2.status, "PENDING")
 
-        code1 = get_user_verification_code(self.user1.pk)
-        code2 = get_user_verification_code(self.user2.pk)
+        code1 = get_user_verification_code(
+            user_id=self.user1.pk, identifier_field=UserIdentifierField.PHONE
+        )
+        code2 = get_user_verification_code(
+            user_id=self.user2.pk, identifier_field=UserIdentifierField.EMAIL
+        )
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())

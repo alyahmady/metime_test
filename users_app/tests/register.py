@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
+from metime.settings import UserIdentifierField
 from users_app.otp import get_user_verification_code
 
 
@@ -43,7 +44,13 @@ class UserRegisterAPITestCase(APITestCase):
         self.assertFalse(response.data["is_phone_verified"])
 
         # Assert verification code is sent and is set in cache (redis)
-        code = get_user_verification_code(response.data["id"])
+
+        # IMPORTANT -> At first attempt (registration), verification code
+        #  will be sent by email, if both phone and email are passed
+        # Refer to -> "users_app.serializers.UserSerializer._user_verification_process"
+        code = get_user_verification_code(
+            user_id=response.data["id"], identifier_field=UserIdentifierField.EMAIL
+        )
         self.assertIsInstance(code, str)
         self.assertTrue(code.isdigit())
         self.assertEqual(len(code), settings.VERIFICATION_CODE_DIGITS_COUNT)

@@ -18,9 +18,13 @@ def activation_key_generator() -> str:
     return code.rjust(settings.VERIFICATION_CODE_DIGITS_COUNT, "0")
 
 
-def get_user_verification_code(user_id: str | int | UUID):
+def get_user_verification_code(
+    user_id: str | int | UUID, identifier_field: UserIdentifierField
+):
     code = cache.get(
-        key=settings.VERIFICATION_CACHE_KEY.format(str(user_id)),
+        key=settings.VERIFICATION_CACHE_KEY.format(
+            user_id=str(user_id), identifier_field=identifier_field.value
+        ),
     )
 
     if isinstance(code, bytes):
@@ -58,8 +62,8 @@ def send_user_verification_code(
         Your verification code is: {activation_key}
     """
 
-    user_field, user_identifier = CustomUser.get_user_identifier_field(user_identifier)
-    if user_field == UserIdentifierField.EMAIL:
+    identifier_field, user_identifier = CustomUser.get_user_identifier_field(user_identifier)
+    if identifier_field == UserIdentifierField.EMAIL:
         send_mail(
             subject=settings.VERIFICATION_EMAIL_SUBJECT,
             message=message,
@@ -67,12 +71,15 @@ def send_user_verification_code(
             from_email=None,
             fail_silently=True,
         )
-    elif user_field == UserIdentifierField.PHONE:
+    elif identifier_field == UserIdentifierField.PHONE:
         CustomUser.sms_user(phone=user_identifier.as_e164, message=message)
 
     redis_client = get_redis_client()
     redis_client.client().setex(
-        name=cache.make_key(settings.VERIFICATION_CACHE_KEY.format(str(user_id))),
+        name=cache.make_key(settings.VERIFICATION_CACHE_KEY.format(
+            user_id=str(user_id),
+            identifier_field=identifier_field.value
+        )),
         value=activation_key,
         time=settings.VERIFICATION_TIMEOUT,
     )

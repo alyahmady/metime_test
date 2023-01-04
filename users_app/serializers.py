@@ -43,6 +43,10 @@ class UserSerializer(serializers.ModelSerializer):
         # Send verification code
         if not user.is_verified:
             verification_kwargs = {"user_id": user.pk}
+
+            # IMPORTANT -> At first attempt (registration), verification code
+            #  will be sent by email, if both phone and email are passed
+
             if user.email and user.is_email_verified is False:
                 verification_kwargs["user_identifier"] = user.email
                 verification_kwargs["is_identifier_verified"] = user.is_email_verified

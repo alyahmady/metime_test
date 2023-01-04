@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 from users_app.otp import get_user_verification_code
 
@@ -83,9 +84,11 @@ class UserUpdateAPITestCase(APITestCase):
         self.assertTrue(response.data["is_email_verified"])
         self.assertFalse(response.data["is_phone_verified"])
 
-        # Assert verification code is sent and is set in cache (redis)
+        # Assert verification code is sent for new phone and is set in cache (redis)
         self.assertIn("id", response.data)
-        code = get_user_verification_code(response.data["id"])
+        code = get_user_verification_code(
+            user_id=response.data["id"], identifier_field=UserIdentifierField.PHONE
+        )
         self.assertIsInstance(code, str)
         self.assertTrue(code.isdigit())
         self.assertEqual(len(code), settings.VERIFICATION_CODE_DIGITS_COUNT)
