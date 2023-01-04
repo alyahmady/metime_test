@@ -106,9 +106,10 @@ class CustomTokenRefreshSerializer(serializers.Serializer):
                     # If blacklist app not installed, `blacklist` method will not be present
                     pass
 
+            now = timezone.now()
             refresh.set_jti()
-            refresh.set_exp()
-            refresh.set_iat()
+            refresh.set_exp(from_time=now)
+            refresh.set_iat(at_time=now)
 
             data["refresh"] = str(refresh)
 
