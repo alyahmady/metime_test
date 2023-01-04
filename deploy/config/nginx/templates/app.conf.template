@@ -40,8 +40,8 @@ server {
     listen ${NGINX_PORT};
     server_name ${NGINX_HOST};
 
-    location ~ /statics/(.*) {
-        proxy_pass          http://backend_block/statics/$1$is_args$args;
+    location ~ /static/(.*) {
+        proxy_pass          http://backend_block/static/$1$is_args$args;
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
