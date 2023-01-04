@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
@@ -85,6 +87,9 @@ class UserUpdateAPITestCase(APITestCase):
         self.assertFalse(response.data["is_phone_verified"])
 
         # Assert verification code is sent for new phone and is set in cache (redis)
+
+        time.sleep(1)
+
         self.assertIn("id", response.data)
         code = get_user_verification_code(
             user_id=response.data["id"], identifier_field=UserIdentifierField.PHONE

@@ -116,7 +116,7 @@ class CustomUserPasswordTestCase(TestCase):
             kwargs={"user_id": user2.pk, "user_identifier": user2.email}
         )
 
-        time.sleep(2)
+        time.sleep(1)
 
         if settings.DEBUG:
             self.assertEqual(task1.status, "SUCCESS")

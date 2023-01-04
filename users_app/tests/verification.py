@@ -104,7 +104,7 @@ class CustomUserVerificationTestCase(TestCase):
             }
         )
 
-        time.sleep(2)
+        time.sleep(1)
 
         if settings.DEBUG:
             self.assertEqual(task1.status, "SUCCESS")

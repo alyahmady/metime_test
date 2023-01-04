@@ -1,3 +1,5 @@
+import time
+
 from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
@@ -48,6 +50,9 @@ class UserRegisterAPITestCase(APITestCase):
         # IMPORTANT -> At first attempt (registration), verification code
         #  will be sent by email, if both phone and email are passed
         # Refer to -> "users_app.serializers.UserSerializer._user_verification_process"
+
+        time.sleep(1)
+
         code = get_user_verification_code(
             user_id=response.data["id"], identifier_field=UserIdentifierField.EMAIL
         )
