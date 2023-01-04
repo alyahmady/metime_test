@@ -72,12 +72,12 @@ def delete_user_reset_password_code(user_id: str | int | UUID):
     )
 
 
-@celery_app.task(ignore_result=True)
+@celery_app.task(ignore_result=False)
 def send_user_verification_code(
     is_identifier_verified: bool,
     user_id: str | int | UUID,
     user_identifier: str | PhoneNumber,
-) -> None:
+) -> str:
     if is_identifier_verified:
         raise ValueError("User identifier is already verified")
 
@@ -111,20 +111,23 @@ def send_user_verification_code(
         time=settings.VERIFICATION_TIMEOUT,
     )
 
+    return f"Verification: {activation_key} sent through {identifier_field.value}" \
+           f" ({user_identifier}), for User ID {user_id}"
 
-@celery_app.task(ignore_result=True)
+
+@celery_app.task(ignore_result=False)
 def send_user_reset_password_code(
     user_id: str | int | UUID,
     user_identifier: str | PhoneNumber,
-):
+) -> str:
     activation_key = activation_key_generator()
 
     message = f"""
         Your password recovery code is: {activation_key}
     """
 
-    user_field, user_identifier = CustomUser.get_user_identifier_field(user_identifier)
-    if user_field == UserIdentifierField.EMAIL:
+    identifier_field, user_identifier = CustomUser.get_user_identifier_field(user_identifier)
+    if identifier_field == UserIdentifierField.EMAIL:
         send_mail(
             subject=settings.RESET_PASSWORD_EMAIL_SUBJECT,
             message=message,
@@ -132,7 +135,7 @@ def send_user_reset_password_code(
             from_email=None,
             fail_silently=True,
         )
-    elif user_field == UserIdentifierField.PHONE:
+    elif identifier_field == UserIdentifierField.PHONE:
         CustomUser.sms_user(phone=user_identifier.as_e164, message=message)
 
     redis_client = get_redis_client()
@@ -141,3 +144,6 @@ def send_user_reset_password_code(
         value=activation_key,
         time=settings.RESET_PASSWORD_TIMEOUT,
     )
+
+    return f"Reset Password: {activation_key} sent through {identifier_field.value}" \
+           f" ({user_identifier}), for User ID {user_id}"
