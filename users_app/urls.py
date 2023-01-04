@@ -17,7 +17,7 @@ urlpatterns = [
     ),
     path(
         "verification/resend",
-        VerificationViewSet.as_view({"put": "resend_verification_code"}),
+        VerificationViewSet.as_view({"post": "resend_verification_code"}),
         name="resend-verification-code",
     ),
 ]

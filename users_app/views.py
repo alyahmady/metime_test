@@ -6,11 +6,11 @@ from rest_framework.response import Response
 
 from metime.permissions import Forbidden, IsOwnerUser, IsActiveUser
 from users_app.models import CustomUser
-from users_app.otp import send_user_verification_code
 from users_app.serializers import (
     UserSerializer,
     ChangePasswordSerializer,
     OTPCodeVerifySerializer,
+    ResendVerificationCodeSerializer,
 )
 
 
@@ -78,22 +78,16 @@ class VerificationViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=["post"], permission_classes=[IsActiveUser])
     def resend_verification_code(self, request, *args, **kwargs):
-        user: get_user_model() = request.user
+        data = request.data.copy()
 
-        verification_kwargs = user.get_verification_kwargs()
-        if not user.is_verified and verification_kwargs:
-            send_user_verification_code.apply_async(kwargs=verification_kwargs)
-        else:
-            return Response(
-                data={"message": "User is already verified"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        serializer = ResendVerificationCodeSerializer(user=request.user, data=data)
+        serializer.is_valid(raise_exception=True)
+        with transaction.atomic():
+            user_identifier = serializer.save()
 
         # TODO: email/phone must be hidden with * in response
         return Response(
-            data={
-                "message": f"Verification code is sent to {verification_kwargs['user_identifier']}"
-            },
+            data={"message": f"Verification code is sent to {user_identifier}"},
             status=status.HTTP_200_OK,
         )
 

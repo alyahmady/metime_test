@@ -151,7 +151,7 @@ class ChangePasswordSerializer(serializers.Serializer):
         self.user.save()
 
 
-class SendVerificationCodeSerializer(serializers.Serializer):
+class ResendVerificationCodeSerializer(serializers.Serializer):
     identifier_field = serializers.ChoiceField(
         choices=[field.value for field in UserIdentifierField],
         write_only=True,
@@ -169,11 +169,15 @@ class SendVerificationCodeSerializer(serializers.Serializer):
         super().__init__(*args, **kwargs)
 
     def validate(self, data):
-        data = super(SendVerificationCodeSerializer, self).validate(data)
+        data = super(ResendVerificationCodeSerializer, self).validate(data)
         identifier_field = data.pop("identifier_field")
 
-        verification_kwargs = self.user.get_verification_kwargs(identifier_field=identifier_field)
-        is_identifier_verified = getattr(self.user, f'is_{identifier_field}_verified', False)
+        verification_kwargs = self.user.get_verification_kwargs(
+            identifier_field=identifier_field
+        )
+        is_identifier_verified = getattr(
+            self.user, f"is_{identifier_field}_verified", False
+        )
 
         if is_identifier_verified is True or not verification_kwargs:
             raise ValidationError(f"User {identifier_field} is already verified")
@@ -183,6 +187,8 @@ class SendVerificationCodeSerializer(serializers.Serializer):
     def save(self, **kwargs):
         verification_kwargs = self.validated_data.pop("verification_kwargs")
         send_user_verification_code.apply_async(kwargs=verification_kwargs)
+
+        return verification_kwargs["user_identifier"]
 
 
 class OTPCodeVerifySerializer(serializers.Serializer):
