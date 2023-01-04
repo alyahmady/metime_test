@@ -4,8 +4,8 @@ from django.conf import settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-from rest_framework_simplejwt.tokens import RefreshToken
 
+from auth_app.tokens import CustomRefreshToken
 from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
 from users_app.otp import get_user_verification_code
@@ -23,7 +23,7 @@ class UserUpdateAPITestCase(APITestCase):
 
         self.user_update_url = reverse("user-update", kwargs={"user_id": self.user.pk})
 
-        refresh = RefreshToken.for_user(self.user)
+        refresh = CustomRefreshToken.for_user(self.user)
         self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + str(refresh.access_token)
         )

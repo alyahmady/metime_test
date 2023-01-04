@@ -7,7 +7,8 @@ from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import PasswordField
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
+
+from auth_app.tokens import CustomRefreshToken
 
 
 class CustomTokenObtainSerializer(serializers.Serializer):
@@ -65,7 +66,7 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 
 
 class CustomTokenObtainPairSerializer(CustomTokenObtainSerializer):
-    token_class = RefreshToken
+    token_class = CustomRefreshToken
 
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -89,7 +90,7 @@ class CustomTokenObtainPairSerializer(CustomTokenObtainSerializer):
 class CustomTokenRefreshSerializer(serializers.Serializer):
     refresh = serializers.CharField()
     access = serializers.CharField(read_only=True)
-    token_class = RefreshToken
+    token_class = CustomRefreshToken
 
     def validate(self, attrs):
         refresh = self.token_class(attrs["refresh"])

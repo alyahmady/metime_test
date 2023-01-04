@@ -4,8 +4,8 @@ from django.urls import reverse
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-from rest_framework_simplejwt.tokens import RefreshToken
 
+from auth_app.tokens import CustomRefreshToken
 from users_app.models import CustomUser
 
 
@@ -21,12 +21,12 @@ class UserChangePasswordAPITestCase(APITestCase):
             "user-password-change", kwargs={"user_id": self.user.pk}
         )
 
-        refresh = RefreshToken.for_user(self.user)
+        refresh = CustomRefreshToken.for_user(self.user)
         self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + str(refresh.access_token)
         )
 
-    def test_success_update_api(self):
+    def test_success_change_password_api(self):
         self.assertTrue(self.user.check_password("HelloWorld1"))
 
         today = timezone.now().date()

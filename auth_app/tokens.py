@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 from rest_framework_simplejwt.exceptions import TokenError
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 
 class CustomAccessToken(AccessToken):
@@ -21,3 +21,7 @@ class CustomAccessToken(AccessToken):
         super().verify()
 
         self.check_iat()
+
+
+class CustomRefreshToken(RefreshToken):
+    access_token_class = CustomAccessToken
