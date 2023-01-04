@@ -219,9 +219,12 @@ class CustomUser(AbstractUser):
                     verification_kwargs["is_identifier_verified"] = self.is_phone_verified
 
             else:
-                verification_kwargs["user_identifier"] = getattr(self, identifier_field)
+                verification_kwargs["user_identifier"] = getattr(self, identifier_field, None)
+                if not verification_kwargs["user_identifier"]:
+                    raise ValidationError(f"User has no {identifier_field} value")
+
                 verification_kwargs["is_identifier_verified"] = getattr(
-                    self, f"is_{identifier_field}_verified"
+                    self, f"is_{identifier_field}_verified", False
                 )
 
         return verification_kwargs
