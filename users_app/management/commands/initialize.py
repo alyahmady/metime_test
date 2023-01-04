@@ -13,15 +13,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         CustomUser = get_user_model()
-        admin_username = os.getenv("DJANGO_ADMIN_USERNAME", "admin")
         admin_email = os.getenv("DJANGO_ADMIN_EMAIL", "admin@example.com")
         admin_password = os.getenv("DJANGO_ADMIN_PASS", "samplepass123")
 
         if not CustomUser.objects.filter(
-            Q(email=admin_email) | Q(username=admin_username) | Q(is_superuser=True)
+            Q(email=admin_email) | Q(is_superuser=True)
         ).exists():
             CustomUser.objects.create_superuser(
-                username=admin_username, email=admin_email, password=admin_password
+                email=admin_email, password=admin_password
             )
 
         self.stdout.write(self.style.SUCCESS("Successfully created Superadmin User"))
