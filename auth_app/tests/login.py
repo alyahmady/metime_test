@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.exceptions import AuthenticationFailed
 
+from auth_app.tokens import CustomAccessToken
 from users_app.models import CustomUser
 
 
@@ -123,16 +124,8 @@ class LoginAPITestCase(APITestCase):
         self.assertEqual(response1.status_code, 200)
         self.assertEqual(response2.status_code, 200)
 
-        access1 = jwt.decode(
-            response1.data["access"],
-            settings.SIMPLE_JWT["SIGNING_KEY"],
-            algorithms=[settings.SIMPLE_JWT["ALGORITHM"]],
-        )
-        access2 = jwt.decode(
-            response2.data["access"],
-            settings.SIMPLE_JWT["SIGNING_KEY"],
-            algorithms=[settings.SIMPLE_JWT["ALGORITHM"]],
-        )
+        access1 = CustomAccessToken(response1.data["access"])
+        access2 = CustomAccessToken(response2.data["access"])
 
         for auth_backend in settings.REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]:
             auth_backend = import_string(auth_backend)
