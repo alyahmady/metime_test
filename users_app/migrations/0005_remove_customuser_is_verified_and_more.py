@@ -10,14 +10,15 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RemoveField(
+        migrations.AlterField(
             model_name="customuser",
             name="is_verified",
-        ),
-        migrations.AddField(
-            model_name="customuser",
-            name="is_email_verified",
             field=models.BooleanField(default=False, verbose_name="Is Email Verified"),
+        ),
+        migrations.RenameField(
+            model_name="customuser",
+            old_name="is_verified",
+            new_name="is_email_verified",
         ),
         migrations.AddField(
             model_name="customuser",
