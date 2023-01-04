@@ -31,14 +31,16 @@ class UserRegisterAPITestCase(APITestCase):
         self.assertIn("id", response.data)
         self.assertIn("date_joined", response.data)
         self.assertIn("is_active", response.data)
-        self.assertIn("is_verified", response.data)
+        self.assertIn("is_email_verified", response.data)
+        self.assertIn("is_phone_verified", response.data)
         self.assertIn("phone", response.data)
         self.assertIn("email", response.data)
         self.assertIn("first_name", response.data)
         self.assertIn("last_name", response.data)
 
         self.assertTrue(response.data["is_active"])
-        self.assertFalse(response.data["is_verified"])
+        self.assertFalse(response.data["is_email_verified"])
+        self.assertFalse(response.data["is_phone_verified"])
 
         # Assert verification code is sent and is set in cache (redis)
         code = get_user_verification_code(response.data["id"])

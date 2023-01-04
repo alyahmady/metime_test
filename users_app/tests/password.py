@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -87,16 +88,45 @@ class CustomUserPasswordTestCase(TestCase):
     def test_reset_password_code_in_cache_existence(self):
         user1 = CustomUser.objects.get(phone="+989101397261")
         user2 = CustomUser.objects.get(email="test@gmail.com")
-        user1.is_verified = False
-        user2.is_verified = False
-        user1.save()
-        user2.save()
 
-        send_user_reset_password_code(user_id=user1.pk, user_identifier=user1.phone)
+        send_user_reset_password_code(
+            user_id=user1.pk, user_identifier=user1.phone.as_e164
+        )
         send_user_reset_password_code(user_id=user2.pk, user_identifier=user2.email)
 
-        code1 = get_user_reset_password_code(user1.pk)
-        code2 = get_user_reset_password_code(user2.pk)
+        code1 = get_user_reset_password_code(user_id=user1.pk)
+        code2 = get_user_reset_password_code(user_id=user2.pk)
+
+        self.assertIsInstance(code1, str)
+        self.assertTrue(code1.isdigit())
+        self.assertEqual(len(code1), settings.VERIFICATION_CODE_DIGITS_COUNT)
+
+        self.assertIsInstance(code2, str)
+        self.assertTrue(code2.isdigit())
+        self.assertEqual(len(code2), settings.VERIFICATION_CODE_DIGITS_COUNT)
+
+    def test_async_reset_password_code_in_cache_existence(self):
+        user1 = CustomUser.objects.get(phone="+989101397261")
+        user2 = CustomUser.objects.get(email="test@gmail.com")
+
+        task1 = send_user_reset_password_code.apply_async(
+            kwargs={"user_id": user1.pk, "user_identifier": user1.phone.as_e164}
+        )
+        task2 = send_user_reset_password_code.apply_async(
+            kwargs={"user_id": user2.pk, "user_identifier": user2.email}
+        )
+
+        time.sleep(2)
+
+        if settings.DEBUG:
+            self.assertEqual(task1.status, "SUCCESS")
+            self.assertEqual(task2.status, "SUCCESS")
+        else:
+            self.assertEqual(task1.status, "PENDING")
+            self.assertEqual(task2.status, "PENDING")
+
+        code1 = get_user_reset_password_code(user_id=user1.pk)
+        code2 = get_user_reset_password_code(user_id=user2.pk)
 
         self.assertIsInstance(code1, str)
         self.assertTrue(code1.isdigit())
