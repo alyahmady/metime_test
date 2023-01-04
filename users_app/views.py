@@ -26,6 +26,8 @@ class UserViewSet(viewsets.ModelViewSet):
             self.throttle_scope = "user_register"
         elif self.action == "update":
             self.throttle_scope = "user_update"
+        elif self.action == "change_password":
+            self.throttle_scope = "change_password"
         return super(UserViewSet, self).get_throttles()
 
     def get_permissions(self):
