@@ -1,5 +1,24 @@
 .idea/
 
+deploy/environments/.env
+
+celerybeat-schedule.bak
+celerybeat-schedule.dat
+celerybeat-schedule.dir
+
+.linuxvenv
+
+staticfiles/*
+!staticfiles/__init__.py
+
+postgres_data
+redis_data
+
+/deploy/config/nginx/conf.d/app.conf
+/deploy/config/nginx/logs/*
+
+logs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
