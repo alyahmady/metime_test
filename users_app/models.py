@@ -24,7 +24,8 @@ class CustomUserManager(UserManager):
         """
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_verified", False)
+        extra_fields.setdefault("is_phone_verified", False)
+        extra_fields.setdefault("is_email_verified", False)
         extra_fields.setdefault("is_active", True)
 
         if not email and not phone:
@@ -48,7 +49,7 @@ class CustomUserManager(UserManager):
         """
         extra_fields["is_superuser"] = True
         extra_fields["is_staff"] = True
-        extra_fields["is_verified"] = True
+        extra_fields["is_email_verified"] = True
         extra_fields["is_active"] = True
 
         return self.create_user(email=email, password=password, **extra_fields)
@@ -110,7 +111,8 @@ class CustomUser(AbstractUser):
     __original_email = None
 
     # Flag fields
-    is_verified = models.BooleanField(_("Is Verified"), default=False)
+    is_phone_verified = models.BooleanField(_("Is Phone Verified"), default=False)
+    is_email_verified = models.BooleanField(_("Is Email Verified"), default=False)
     is_active = models.BooleanField(_("Is Active"), default=True)
 
     USERNAME_FIELD = "email"
@@ -119,6 +121,14 @@ class CustomUser(AbstractUser):
     PHONE_FIELD = "phone"
 
     objects = CustomUserManager()
+
+    @property
+    def is_verified(self):
+        return self.is_phone_verified and self.is_email_verified
+
+    @property
+    def can_login(self):
+        return self.is_phone_verified or self.is_email_verified
 
     @property
     def full_name(self):
@@ -150,8 +160,11 @@ class CustomUser(AbstractUser):
         if self._password is not None:
             password_changed = True
 
-        if self.phone != self.__original_phone or self.email != self.__original_email:
-            self.is_verified = False
+        if self.phone != self.__original_phone:
+            self.is_phone_verified = False
+
+        if self.email != self.__original_email:
+            self.is_email_verified = False
 
         super().save(*args, **kwargs)
 

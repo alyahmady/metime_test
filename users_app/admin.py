@@ -11,20 +11,46 @@ class CustomUserAdmin(UserAdmin):
         "phone",
         "full_name",
         "is_active",
-        "is_verified",
+        "is_email_verified",
+        "is_phone_verified",
         "date_joined",
         "last_login",
     )
     list_display_links = ("email", "phone", "full_name")
-    list_filter = ("is_superuser", "is_active", "is_verified")
+    list_filter = (
+        "is_superuser",
+        "is_active",
+        "is_email_verified",
+        "is_phone_verified",
+    )
     fieldsets = (
         (None, {"fields": ("email", "phone", "password")}),
-        ("Permissions", {"fields": ("is_staff", "is_active", "is_verified")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_staff",
+                    "is_active",
+                    "is_email_verified",
+                    "is_phone_verified",
+                )
+            },
+        ),
         ("Information", {"fields": ("first_name", "last_name")}),
     )
     add_fieldsets = (
         (None, {"fields": ("email", "phone", "password1", "password2")}),
-        ("Permissions", {"fields": ("is_staff", "is_active", "is_verified")}),
+        (
+            "Permissions",
+            {
+                "fields": (
+                    "is_staff",
+                    "is_active",
+                    "is_email_verified",
+                    "is_phone_verified",
+                )
+            },
+        ),
         ("Information", {"fields": ("first_name", "last_name")}),
     )
     search_fields = ("email", "phone", "first_name", "last_name")

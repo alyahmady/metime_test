@@ -25,13 +25,15 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "password_confirm",
             "is_active",
-            "is_verified",
+            "is_phone_verified",
+            "is_email_verified",
         )
         read_only_fields = (
             "id",
             "date_joined",
             "is_active",
-            "is_verified",
+            "is_phone_verified",
+            "is_email_verified",
         )
         extra_kwargs = {
             "email": {"required": False, "allow_null": False},
