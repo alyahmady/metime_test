@@ -25,13 +25,15 @@ class UserSerializer(serializers.ModelSerializer):
             "password",
             "password_confirm",
             "is_active",
-            "is_verified",
+            "is_phone_verified",
+            "is_email_verified",
         )
         read_only_fields = (
             "id",
             "date_joined",
             "is_active",
-            "is_verified",
+            "is_phone_verified",
+            "is_email_verified",
         )
         extra_kwargs = {
             "email": {"required": False, "allow_null": False},
@@ -40,11 +42,19 @@ class UserSerializer(serializers.ModelSerializer):
     def _user_verification_process(self, user: CustomUser):
         # Send verification code
         if not user.is_verified:
-            verification_kwargs = {"is_verified": user.is_verified, "user_id": user.pk}
-            if user.email:
+            verification_kwargs = {"user_id": user.pk}
+
+            # IMPORTANT -> At first attempt (registration), verification code
+            #  will be sent by email, if both phone and email are passed
+
+            if user.email and user.is_email_verified is False:
                 verification_kwargs["user_identifier"] = user.email
-            elif user.phone:
+                verification_kwargs["is_identifier_verified"] = user.is_email_verified
+            elif user.phone and user.is_phone_verified is False:
                 verification_kwargs["user_identifier"] = user.phone.as_e164
+                verification_kwargs["is_identifier_verified"] = user.is_phone_verified
+            else:
+                return
 
             send_user_verification_code.apply_async(kwargs=verification_kwargs)
 

@@ -6,7 +6,17 @@ from rest_framework_simplejwt.exceptions import InvalidToken, AuthenticationFail
 from rest_framework_simplejwt.settings import api_settings
 
 
-class CustomUserAuthBackend(ModelBackend):
+class AuthHelper:
+    def is_user_active(self, user: get_user_model()) -> bool:
+        is_active = getattr(user, "is_active", False)
+        return is_active
+
+    def user_can_authenticate(self, user: get_user_model()) -> bool:
+        can_login = getattr(user, "can_login", False)
+        return self.is_user_active(user) and can_login
+
+
+class CustomUserAuthBackend(AuthHelper, ModelBackend):
     UserModel = get_user_model()
 
     def authenticate(self, request, phone=None, email=None, password=None):
@@ -18,21 +28,13 @@ class CustomUserAuthBackend(ModelBackend):
         except self.UserModel.DoesNotExist:
             return None
 
-        if user.check_password(password):
+        if user.check_password(password) and self.is_user_active(user):
             return user
 
         return None
 
-    def user_can_authenticate(self, user):
-        """
-        Reject users with is_active=False or is_verified=False.
-        """
-        is_active = getattr(user, "is_active", False)
-        is_verified = getattr(user, "is_verified", False)
-        return is_active and is_verified
 
-
-class CustomJWTAuthentication(JWTAuthentication):
+class CustomJWTAuthentication(AuthHelper, JWTAuthentication):
     www_authenticate_realm = "api"
     media_type = "application/json"
 
@@ -49,12 +51,7 @@ class CustomJWTAuthentication(JWTAuthentication):
         except self.user_model.DoesNotExist:
             raise AuthenticationFailed(_("User not found"), code="user_not_found")
 
-        if not user.is_active:
-            raise AuthenticationFailed(_("User is inactive"), code="user_inactive")
-
-        if not user.is_verified:
-            raise AuthenticationFailed(
-                _("User is not verified"), code="user_not_verified"
-            )
+        if not self.user_can_authenticate(user):
+            raise AuthenticationFailed(_("User is not verified"), code="user_inactive")
 
         return user

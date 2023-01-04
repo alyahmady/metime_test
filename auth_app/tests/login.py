@@ -13,16 +13,21 @@ from users_app.models import CustomUser
 class LoginAPITestCase(APITestCase):
     def setUp(self):
         self.user1 = CustomUser.objects.create_user(
-            phone="+989101397261", password="HelloWorld1"
+            phone="+989101397261", password="HelloWorld1", is_active=True
         )
         self.user2 = CustomUser.objects.create_user(
-            email="test@gmail.com", password="HelloWorld2"
+            email="test@gmail.com", password="HelloWorld2", is_active=True
         )
 
         self.token_obtain_pair_url = reverse("token-obtain-pair")
         self.token_refresh_url = reverse("token-refresh")
 
     def test_success_obtain_api(self):
+        self.user1.is_active = True
+        self.user2.is_active = True
+        self.user1.save()
+        self.user2.save()
+
         response1 = self.client.post(
             self.token_obtain_pair_url,
             {"phone": self.user1.phone.as_e164, "password": "HelloWorld1"},
@@ -43,6 +48,9 @@ class LoginAPITestCase(APITestCase):
         self.assertIn("refresh", response2.data)
 
     def test_extra_field_obtain_api(self):
+        self.user2.is_active = True
+        self.user2.save()
+
         response = self.client.post(
             self.token_obtain_pair_url,
             {"email": self.user2.email, "hello": "world", "password": "HelloWorld2"},
@@ -54,7 +62,15 @@ class LoginAPITestCase(APITestCase):
         self.assertIn("access", response.data)
         self.assertIn("refresh", response.data)
 
+        self.user2.is_email_verified = False
+        self.user2.save()
+
     def test_missing_required_field_obtain_api(self):
+        self.user1.is_active = True
+        self.user2.is_active = True
+        self.user1.save()
+        self.user2.save()
+
         res1 = self.client.post(
             self.token_obtain_pair_url,
             {"password": "HelloWorld2"},
@@ -88,6 +104,11 @@ class LoginAPITestCase(APITestCase):
         self.assertIn("password", res5.data)
 
     def test_valid_access_token_obtain_api(self):
+        self.user1.is_active = True
+        self.user2.is_active = True
+        self.user1.save()
+        self.user2.save()
+
         response1 = self.client.post(
             self.token_obtain_pair_url,
             {"phone": self.user1.phone.as_e164, "password": "HelloWorld1"},
@@ -98,6 +119,9 @@ class LoginAPITestCase(APITestCase):
             {"email": self.user2.email, "password": "HelloWorld2"},
             format="json",
         )
+
+        self.assertEqual(response1.status_code, 200)
+        self.assertEqual(response2.status_code, 200)
 
         access1 = jwt.decode(
             response1.data["access"],
@@ -114,15 +138,20 @@ class LoginAPITestCase(APITestCase):
             auth_backend = import_string(auth_backend)
             auth_backend_worker = auth_backend()
 
+            self.user1.is_phone_verified = False
+            self.user1.save()
+            self.user2.is_email_verified = False
+            self.user2.save()
+
             with self.assertRaisesMessage(AuthenticationFailed, "not verified"):
                 auth_backend_worker.get_user(access1)
 
             with self.assertRaisesMessage(AuthenticationFailed, "not verified"):
                 auth_backend_worker.get_user(access2)
 
-            self.user1.is_verified = True
+            self.user1.is_email_verified = True
             self.user1.save()
-            self.user2.is_verified = True
+            self.user2.is_phone_verified = True
             self.user2.save()
 
             user1 = auth_backend_worker.get_user(access1)
@@ -134,12 +163,12 @@ class LoginAPITestCase(APITestCase):
             self.assertIsInstance(user1, get_user_model())
             self.assertIsInstance(user2, get_user_model())
 
-            self.user1.is_verified = False
-            self.user1.save()
-            self.user2.is_verified = False
-            self.user2.save()
-
     def test_valid_refresh_token_obtain_api(self):
+        self.user1.is_active = True
+        self.user2.is_active = True
+        self.user1.save()
+        self.user2.save()
+
         response1 = self.client.post(
             self.token_obtain_pair_url,
             {"phone": self.user1.phone.as_e164, "password": "HelloWorld1"},
@@ -178,6 +207,9 @@ class LoginAPITestCase(APITestCase):
             self.assertNotEqual(refresh_response2.data["refresh"], refresh2)
 
     def test_extra_field_refresh_api(self):
+        self.user1.is_active = True
+        self.user1.save()
+
         access_response = self.client.post(
             self.token_obtain_pair_url,
             {"phone": self.user1.phone.as_e164, "password": "HelloWorld1"},
