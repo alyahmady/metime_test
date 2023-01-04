@@ -131,20 +131,39 @@ class LoginAPITestCase(APITestCase):
             auth_backend = import_string(auth_backend)
             auth_backend_worker = auth_backend()
 
+            self.user1.is_active = False
+            self.user1.save()
+            self.user2.is_active = False
+            self.user2.save()
+
+            with self.assertRaisesMessage(AuthenticationFailed, "not active"):
+                auth_backend_worker.get_user(access1)
+
+            with self.assertRaisesMessage(AuthenticationFailed, "not active"):
+                auth_backend_worker.get_user(access2)
+
+            self.user1.is_active = True
+            self.user1.save()
+            self.user2.is_active = True
+            self.user2.save()
+
             self.user1.is_phone_verified = False
             self.user1.save()
             self.user2.is_email_verified = False
             self.user2.save()
 
-            with self.assertRaisesMessage(AuthenticationFailed, "not verified"):
-                auth_backend_worker.get_user(access1)
+            user1 = auth_backend_worker.get_user(access1)
+            user2 = auth_backend_worker.get_user(access2)
 
-            with self.assertRaisesMessage(AuthenticationFailed, "not verified"):
-                auth_backend_worker.get_user(access2)
+            self.assertIsNotNone(user1, None)
+            self.assertIsNotNone(user2, None)
 
-            self.user1.is_email_verified = True
+            self.assertIsInstance(user1, get_user_model())
+            self.assertIsInstance(user2, get_user_model())
+
+            self.user1.is_phone_verified = True
             self.user1.save()
-            self.user2.is_phone_verified = True
+            self.user2.is_email_verified = True
             self.user2.save()
 
             user1 = auth_backend_worker.get_user(access1)

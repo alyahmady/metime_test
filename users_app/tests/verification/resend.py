@@ -13,7 +13,7 @@ from users_app.otp import get_user_verification_code
 
 class ResendVerificationCodeAPITestCase(APITestCase):
     def setUp(self):
-        self.resend_verification_code = reverse("resend-verification-code")
+        self.resend_verification_code_url = reverse("resend-verification-code")
 
         self.user = CustomUser.objects.create_user(
             email="test12@gmail.com",
@@ -44,7 +44,7 @@ class ResendVerificationCodeAPITestCase(APITestCase):
 
         identifier = UserIdentifierField.EMAIL.value
         response = self.client.post(
-            self.resend_verification_code,
+            self.resend_verification_code_url,
             {
                 "identifier_field": identifier,
             },
@@ -72,7 +72,7 @@ class ResendVerificationCodeAPITestCase(APITestCase):
 
         identifier = UserIdentifierField.PHONE.value
         response = self.client.post(
-            self.resend_verification_code,
+            self.resend_verification_code_url,
             {
                 "identifier_field": identifier,
             },
@@ -88,7 +88,7 @@ class ResendVerificationCodeAPITestCase(APITestCase):
         self.assertTrue(self.user.is_email_verified)
 
         response = self.client.post(
-            self.resend_verification_code,
+            self.resend_verification_code_url,
             {
                 "identifier_field": UserIdentifierField.EMAIL.value,
             },

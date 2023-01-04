@@ -23,7 +23,7 @@ class CustomUserVerificationTestCase(TestCase):
             password="Helloworld2",
         )
 
-    def test_activation_code_generator(self):
+    def test_activation_key_generator(self):
         code = activation_key_generator()
         self.assertIsInstance(code, str)
         self.assertTrue(code.isdigit())

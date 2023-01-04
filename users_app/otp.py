@@ -61,7 +61,7 @@ def delete_user_verification_code(
 
     cache.delete(
         key=settings.VERIFICATION_CACHE_KEY.format(
-            user_id=str(user_id), identifier_field=identifier_field.value
+            user_id=str(user_id), identifier_field=identifier_field
         ),
     )
 
