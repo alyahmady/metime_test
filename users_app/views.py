@@ -82,8 +82,7 @@ class VerificationViewSet(viewsets.GenericViewSet):
 
         serializer = ResendVerificationCodeSerializer(user=request.user, data=data)
         serializer.is_valid(raise_exception=True)
-        with transaction.atomic():
-            user_identifier = serializer.save()
+        user_identifier = serializer.save()
 
         # TODO: email/phone must be hidden with * in response
         return Response(
