@@ -156,9 +156,8 @@ class CustomUser(AbstractUser):
         self.__original_email = self.email
 
     def save(self, *args, **kwargs):
-        password_changed = False
         if self._password is not None:
-            password_changed = True
+            self.last_password_change = timezone.now()
 
         if self.phone != self.__original_phone:
             self.is_phone_verified = False
@@ -170,9 +169,6 @@ class CustomUser(AbstractUser):
 
         self.__original_email = self.email
         self.__original_phone = self.phone
-
-        if password_changed:
-            self.last_password_change = timezone.now()
 
     def __str__(self):
         return f"{self.full_name or self.pk}"
