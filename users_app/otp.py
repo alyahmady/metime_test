@@ -52,6 +52,26 @@ def get_user_reset_password_code(user_id: str | int | UUID):
     return code
 
 
+def delete_user_verification_code(
+    user_id: str | int | UUID, identifier_field: UserIdentifierField | str
+):
+
+    if isinstance(identifier_field, UserIdentifierField):
+        identifier_field = identifier_field.value
+
+    cache.delete(
+        key=settings.VERIFICATION_CACHE_KEY.format(
+            user_id=str(user_id), identifier_field=identifier_field.value
+        ),
+    )
+
+
+def delete_user_reset_password_code(user_id: str | int | UUID):
+    cache.delete(
+        key=settings.RESET_PASSWORD_CACHE_KEY.format(str(user_id)),
+    )
+
+
 @celery_app.task(ignore_result=True)
 def send_user_verification_code(
     is_identifier_verified: bool,
