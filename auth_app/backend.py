@@ -57,8 +57,9 @@ class CustomJWTAuthentication(AuthHelper, JWTAuthentication):
         iat_value = validated_token.payload["iat"]
         iat_time: datetime.datetime = datetime_from_epoch(iat_value)
 
-        if iat_time <= user.last_password_change:
-            raise InvalidToken(_("Token is expired. User must re-login"))
+        if isinstance(user.last_password_change, datetime.datetime):
+            if iat_time <= user.last_password_change:
+                raise InvalidToken(_("Token is expired. User must re-login"))
 
     def get_user(self, validated_token):
         try:
