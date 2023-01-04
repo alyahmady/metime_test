@@ -17,11 +17,14 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView
 
+from metime.views import Healthcheck
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("rest_framework.urls")),
     path("auth/", include("auth_app.urls")),
     path("users/", include("users_app.urls")),
+    path("health/", Healthcheck.as_view(), name="healthcheck"),
     path(
         "api/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),

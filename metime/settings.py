@@ -157,10 +157,7 @@ AUTH_USER_MODEL = "users_app.CustomUser"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
+    "http://localhost:8000",
 ]
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -196,6 +193,7 @@ REST_FRAMEWORK = {
         "otp_code_verify": "1000/day",
         "token_obtain": "1000/day",
         "token_refresh": "1000/day",
+        "healthcheck": "1000/day",
     },
 }
 
