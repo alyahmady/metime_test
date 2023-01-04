@@ -137,7 +137,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate(self, data):
         data = super(ChangePasswordSerializer, self).validate(data)
 
-        current_password = data["current_password"]
+        current_password = data.pop("current_password")
         if self.user.check_password(current_password) is False:
             raise AuthenticationFailed("Current password doesn't match the user")
 

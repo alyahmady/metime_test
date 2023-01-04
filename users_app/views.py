@@ -37,12 +37,13 @@ class UserViewSet(viewsets.ModelViewSet):
         with transaction.atomic():
             serializer.save()
 
-    @action(methods=["get"], permission_classes=[IsOwnerUser])
+    @action(detail=True, methods=["put"], permission_classes=[IsOwnerUser])
     def change_password(self, request, *args, **kwargs):
         data = request.data.copy()
 
         serializer = ChangePasswordSerializer(user=request.user, data=data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        with transaction.atomic():
+            serializer.save()
 
         return Response(status=status.HTTP_200_OK)
