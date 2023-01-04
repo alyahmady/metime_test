@@ -6,7 +6,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
 from django.db.models import Q
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import to_python, PhoneNumber
@@ -156,9 +155,6 @@ class CustomUser(AbstractUser):
         self.__original_email = self.email
 
     def save(self, *args, **kwargs):
-        if self._password is not None:
-            self.last_password_change = timezone.now()
-
         if self.phone != self.__original_phone:
             self.is_phone_verified = False
 

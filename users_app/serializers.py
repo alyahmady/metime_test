@@ -1,5 +1,6 @@
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
+from django.utils import timezone
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, AuthenticationFailed
@@ -154,4 +155,5 @@ class ChangePasswordSerializer(serializers.Serializer):
     def save(self, **kwargs):
         new_password = self.validated_data.pop("new_password")
         self.user.set_password(new_password)
+        self.user.last_password_change = timezone.now()
         self.user.save()
