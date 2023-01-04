@@ -1,9 +1,11 @@
 from django.db import transaction
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
-from users_app.models import CustomUser
 from metime.permissions import Forbidden, IsOwnerUser
-from users_app.serializers import UserSerializer
+from users_app.models import CustomUser
+from users_app.serializers import UserSerializer, ChangePasswordSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -23,7 +25,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == "create":
             return [permissions.AllowAny()]
-        elif self.action == "update":
+        elif self.action in ["update", "change_password"]:
             return [IsOwnerUser()]
         return [Forbidden()]
 
@@ -34,3 +36,13 @@ class UserViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         with transaction.atomic():
             serializer.save()
+
+    @action(methods=["get"], permission_classes=[IsOwnerUser])
+    def change_password(self, request, *args, **kwargs):
+        data = request.data.copy()
+
+        serializer = ChangePasswordSerializer(user=request.user, data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(status=status.HTTP_200_OK)
