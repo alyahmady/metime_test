@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  metime_back_service:
+    restart: always
+    container_name: metime_back_service
+    hostname: metime_back_service
+    build:
+      context: ./
+      dockerfile: ./local.Dockerfile
+    env_file:
+      - ./deploy/environments/.env
+    volumes:
+      - ./logs:/code/logs
+    expose:
+      - 8000
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    env_file:
+      - ./deploy/environments/.env.nginx
+    depends_on:
+      - metime_back_service
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./deploy/config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./deploy/config/nginx/conf.d:/etc/nginx/conf.d
+      - ./deploy/config/nginx/templates:/etc/nginx/templates
+      - ./logs/nginx:/var/log/nginx
+
+  redis:
+    image: docker.io/bitnami/redis:latest
+    env_file:
+      - ./deploy/environments/.env.redis
+    expose:
+      - 6379
+    volumes:
+      - ./redis_data:/bitnami/redis/data
+
+  database:
+    image: postgres:14-alpine
+    env_file:
+      - ./deploy/environments/.env.postgres
+    expose:
+      - 5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data/
