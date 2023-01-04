@@ -19,11 +19,15 @@ def activation_key_generator() -> str:
 
 
 def get_user_verification_code(
-    user_id: str | int | UUID, identifier_field: UserIdentifierField
+    user_id: str | int | UUID, identifier_field: UserIdentifierField | str
 ):
+
+    if isinstance(identifier_field, UserIdentifierField):
+        identifier_field = identifier_field.value
+
     code = cache.get(
         key=settings.VERIFICATION_CACHE_KEY.format(
-            user_id=str(user_id), identifier_field=identifier_field.value
+            user_id=str(user_id), identifier_field=identifier_field
         ),
     )
 
@@ -62,7 +66,9 @@ def send_user_verification_code(
         Your verification code is: {activation_key}
     """
 
-    identifier_field, user_identifier = CustomUser.get_user_identifier_field(user_identifier)
+    identifier_field, user_identifier = CustomUser.get_user_identifier_field(
+        user_identifier
+    )
     if identifier_field == UserIdentifierField.EMAIL:
         send_mail(
             subject=settings.VERIFICATION_EMAIL_SUBJECT,
@@ -76,10 +82,11 @@ def send_user_verification_code(
 
     redis_client = get_redis_client()
     redis_client.client().setex(
-        name=cache.make_key(settings.VERIFICATION_CACHE_KEY.format(
-            user_id=str(user_id),
-            identifier_field=identifier_field.value
-        )),
+        name=cache.make_key(
+            settings.VERIFICATION_CACHE_KEY.format(
+                user_id=str(user_id), identifier_field=identifier_field.value
+            )
+        ),
         value=activation_key,
         time=settings.VERIFICATION_TIMEOUT,
     )
