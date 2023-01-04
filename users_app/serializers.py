@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from django.utils import timezone
@@ -5,8 +6,13 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, AuthenticationFailed
 
+from metime.settings import UserIdentifierField
 from users_app.models import CustomUser
-from users_app.otp import send_user_verification_code
+from users_app.otp import (
+    send_user_verification_code,
+    get_user_verification_code,
+    delete_user_verification_code,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,22 +47,8 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def _user_verification_process(self, user: CustomUser):
-        # Send verification code
-        if not user.is_verified:
-            verification_kwargs = {"user_id": user.pk}
-
-            # IMPORTANT -> At first attempt (registration), verification code
-            #  will be sent by email, if both phone and email are passed
-
-            if user.email and user.is_email_verified is False:
-                verification_kwargs["user_identifier"] = user.email
-                verification_kwargs["is_identifier_verified"] = user.is_email_verified
-            elif user.phone and user.is_phone_verified is False:
-                verification_kwargs["user_identifier"] = user.phone.as_e164
-                verification_kwargs["is_identifier_verified"] = user.is_phone_verified
-            else:
-                return
-
+        verification_kwargs = user.get_verification_kwargs()
+        if not user.is_verified and verification_kwargs:
             send_user_verification_code.apply_async(kwargs=verification_kwargs)
 
     def validate(self, data):
@@ -157,3 +149,92 @@ class ChangePasswordSerializer(serializers.Serializer):
         self.user.set_password(new_password)
         self.user.last_password_change = timezone.now()
         self.user.save()
+
+
+class ResendVerificationCodeSerializer(serializers.Serializer):
+    identifier_field = serializers.ChoiceField(
+        choices=[field.value for field in UserIdentifierField],
+        write_only=True,
+        allow_null=False,
+        allow_blank=False,
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        try:
+            self.user: CustomUser = kwargs.pop("user")
+        except LookupError:
+            raise LookupError("User is required")
+
+        super().__init__(*args, **kwargs)
+
+    def validate(self, data):
+        data = super(ResendVerificationCodeSerializer, self).validate(data)
+        identifier_field = data.pop("identifier_field")
+
+        verification_kwargs = self.user.get_verification_kwargs(
+            identifier_field=identifier_field
+        )
+        is_identifier_verified = getattr(
+            self.user, f"is_{identifier_field}_verified", False
+        )
+
+        if is_identifier_verified is True or not verification_kwargs:
+            raise ValidationError(f"User {identifier_field} is already verified")
+
+        return {"verification_kwargs": verification_kwargs}
+
+    def save(self, **kwargs):
+        verification_kwargs = self.validated_data.pop("verification_kwargs")
+        send_user_verification_code.apply_async(kwargs=verification_kwargs)
+
+        return verification_kwargs["user_identifier"]
+
+
+class OTPCodeVerifySerializer(serializers.Serializer):
+    code = serializers.CharField(
+        write_only=True,
+        max_length=settings.VERIFICATION_CODE_DIGITS_COUNT,
+        allow_null=False,
+        allow_blank=False,
+        required=True,
+    )
+    identifier_field = serializers.ChoiceField(
+        choices=[field.value for field in UserIdentifierField],
+        write_only=True,
+        allow_null=False,
+        allow_blank=False,
+        required=True,
+    )
+
+    def __init__(self, *args, **kwargs):
+        try:
+            self.user: CustomUser = kwargs.pop("user")
+        except LookupError:
+            raise LookupError("User is required")
+
+        super().__init__(*args, **kwargs)
+
+    def validate(self, data):
+        data = super(OTPCodeVerifySerializer, self).validate(data)
+        input_code = data.pop("code")
+        identifier_field = data["identifier_field"]
+
+        stored_code = get_user_verification_code(
+            user_id=self.user.pk, identifier_field=identifier_field
+        )
+        if not stored_code:
+            raise ValidationError("No code found for the user")
+
+        if input_code != stored_code:
+            raise ValidationError("Input code is not valid")
+
+        return data
+
+    def save(self, **kwargs):
+        identifier_field = self.validated_data.pop("identifier_field")
+        setattr(self.user, f"is_{identifier_field}_verified", True)
+        self.user.save()
+        delete_user_verification_code(
+            user_id=self.user.id, identifier_field=identifier_field
+        )

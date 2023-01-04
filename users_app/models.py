@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Dict
 
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.contrib.auth.password_validation import validate_password
@@ -197,6 +197,37 @@ class CustomUser(AbstractUser):
                 raise ValueError(
                     "Invalid identifier value. Either must be email or phone number"
                 )
+
+    def get_verification_kwargs(
+        self, identifier_field: None | str | UserIdentifierField = None
+    ) -> Dict[str, str | PhoneNumber] | None:
+
+        verification_kwargs = None
+        if not self.is_verified:
+            verification_kwargs = {"user_id": self.pk}
+
+            if not identifier_field:
+                # IMPORTANT -> At first attempt (registration), verification code
+                #  will be sent by email, if both phone and email are passed
+
+                if self.email and self.is_email_verified is False:
+                    verification_kwargs["user_identifier"] = self.email
+                    verification_kwargs["is_identifier_verified"] = self.is_email_verified
+
+                elif self.phone and self.is_phone_verified is False:
+                    verification_kwargs["user_identifier"] = self.phone.as_e164
+                    verification_kwargs["is_identifier_verified"] = self.is_phone_verified
+
+            else:
+                verification_kwargs["user_identifier"] = getattr(self, identifier_field, None)
+                if not verification_kwargs["user_identifier"]:
+                    raise ValidationError(f"User has no {identifier_field} value")
+
+                verification_kwargs["is_identifier_verified"] = getattr(
+                    self, f"is_{identifier_field}_verified", False
+                )
+
+        return verification_kwargs
 
     @classmethod
     def sms_user(cls, phone, message, from_number=None, **kwargs):

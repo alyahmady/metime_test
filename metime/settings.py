@@ -187,12 +187,15 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.ScopedRateThrottle",
     ),
     "DEFAULT_THROTTLE_RATES": {
-        "anon": "100/day",
+        "anon": "1000/day",
         "user": "1000/day",
-        "user_register": "100/day",
-        "user_update": "300/day",
-        "token_obtain": "100/day",
-        "token_refresh": "10/day",
+        "user_register": "1000/day",
+        "user_update": "1000/day",
+        "change_password": "1000/day",
+        "resend_verification_code": "1000/day",
+        "otp_code_verify": "1000/day",
+        "token_obtain": "1000/day",
+        "token_refresh": "1000/day",
     },
 }
 
@@ -242,13 +245,15 @@ if REDIS_PASSWORD:
 if DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    DEFAULT_FROM_EMAIL = "Default@MeTime.com"
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_USE_TLS = True
-    EMAIL_HOST = "smtp.gmail.com"
-    EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "test@gmail.com")
-    EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_USER", "password")
-    EMAIL_PORT = 587
+    # TODO
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    # DEFAULT_FROM_EMAIL = "Default@MeTime.com"
+    # EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    # EMAIL_USE_TLS = True
+    # EMAIL_HOST = "smtp.gmail.com"
+    # EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "test@gmail.com")
+    # EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_USER", "password")
+    # EMAIL_PORT = 587
 
 
 class UserIdentifierField(enum.Enum):
