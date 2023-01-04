@@ -1,11 +1,11 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import PasswordField
-
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -74,6 +74,11 @@ class CustomTokenObtainPairSerializer(CustomTokenObtainSerializer):
 
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
+
+        # Add custom data here
+        now = timezone.now()
+        refresh.access_token.set_iat(at_time=now)
+        refresh.access_token.set_exp(from_time=now)
 
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, self.user)
