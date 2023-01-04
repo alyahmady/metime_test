@@ -1,1 +1,2 @@
 from .celery import CustomUserVerificationTestCase
+from .resend import ResendVerificationCodeAPITestCase
