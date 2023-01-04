@@ -207,6 +207,7 @@ SIMPLE_JWT = {
     "SIGNING_KEY": SECRET_KEY,
     "TOKEN_OBTAIN_SERIALIZER": "auth_app.serializers.CustomTokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "auth_app.serializers.CustomTokenRefreshSerializer",
+    "AUTH_TOKEN_CLASSES": ("auth_app.tokens.CustomAccessToken",),
 }
 
 AUTHENTICATION_BACKENDS = ["auth_app.backend.CustomUserAuthBackend"]

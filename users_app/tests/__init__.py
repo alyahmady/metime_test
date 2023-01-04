@@ -3,3 +3,4 @@ from .verification import CustomUserVerificationTestCase
 from .password import CustomUserPasswordTestCase
 from .register import UserRegisterAPITestCase
 from .update import UserUpdateAPITestCase
+from .change_password import UserChangePasswordAPITestCase

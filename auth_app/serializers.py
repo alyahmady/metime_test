@@ -1,13 +1,14 @@
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.models import update_last_login
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import exceptions, serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import PasswordField
-
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
+
+from auth_app.tokens import CustomRefreshToken
 
 
 class CustomTokenObtainSerializer(serializers.Serializer):
@@ -65,7 +66,7 @@ class CustomTokenObtainSerializer(serializers.Serializer):
 
 
 class CustomTokenObtainPairSerializer(CustomTokenObtainSerializer):
-    token_class = RefreshToken
+    token_class = CustomRefreshToken
 
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -74,6 +75,11 @@ class CustomTokenObtainPairSerializer(CustomTokenObtainSerializer):
 
         data["refresh"] = str(refresh)
         data["access"] = str(refresh.access_token)
+
+        # Add custom data here
+        now = timezone.now()
+        refresh.access_token.set_iat(at_time=now)
+        refresh.access_token.set_exp(from_time=now)
 
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, self.user)
@@ -84,7 +90,7 @@ class CustomTokenObtainPairSerializer(CustomTokenObtainSerializer):
 class CustomTokenRefreshSerializer(serializers.Serializer):
     refresh = serializers.CharField()
     access = serializers.CharField(read_only=True)
-    token_class = RefreshToken
+    token_class = CustomRefreshToken
 
     def validate(self, attrs):
         refresh = self.token_class(attrs["refresh"])
@@ -100,9 +106,10 @@ class CustomTokenRefreshSerializer(serializers.Serializer):
                     # If blacklist app not installed, `blacklist` method will not be present
                     pass
 
+            now = timezone.now()
             refresh.set_jti()
-            refresh.set_exp()
-            refresh.set_iat()
+            refresh.set_exp(from_time=now)
+            refresh.set_iat(at_time=now)
 
             data["refresh"] = str(refresh)
 
