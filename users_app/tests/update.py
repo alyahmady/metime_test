@@ -20,7 +20,9 @@ class UserUpdateAPITestCase(APITestCase):
             is_email_verified=True,
             is_phone_verified=True,
         )
+
         self.user_update_url = reverse("user-update", kwargs={"user_id": self.user.pk})
+
         refresh = RefreshToken.for_user(self.user)
         self.client.credentials(
             HTTP_AUTHORIZATION="Bearer " + str(refresh.access_token)
