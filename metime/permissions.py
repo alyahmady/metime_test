@@ -21,7 +21,7 @@ class IsActiveUser(IsAuthenticated):
 
         conditions = (
             is_authenticated,
-            getattr(request.user, "is_active", False),
+            request.user.is_active is True,
             (not isinstance(request.user, AnonymousUser)),
             (isinstance(request.user, get_user_model())),
         )

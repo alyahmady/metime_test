@@ -14,13 +14,9 @@ from rest_framework_simplejwt.utils import datetime_from_epoch
 
 
 class AuthHelper:
-    def is_user_active(self, user: get_user_model()) -> bool:
+    def user_can_authenticate(self, user: get_user_model()) -> bool:
         is_active = getattr(user, "is_active", False)
         return is_active
-
-    def user_can_authenticate(self, user: get_user_model()) -> bool:
-        can_login = getattr(user, "can_login", False)
-        return self.is_user_active(user) and can_login
 
 
 class CustomUserAuthBackend(AuthHelper, ModelBackend):
@@ -35,7 +31,7 @@ class CustomUserAuthBackend(AuthHelper, ModelBackend):
         except self.UserModel.DoesNotExist:
             return None
 
-        if user.check_password(password) and self.is_user_active(user):
+        if user.check_password(password) and self.user_can_authenticate(user):
             return user
 
         return None
@@ -75,7 +71,7 @@ class CustomJWTAuthentication(AuthHelper, JWTAuthentication):
             raise AuthenticationFailed(_("User not found"), code="user_not_found")
 
         if not self.user_can_authenticate(user):
-            raise AuthenticationFailed(_("User is not verified"), code="user_inactive")
+            raise AuthenticationFailed(_("User is not active"), code="user_inactive")
 
         self.validate_token_iat(validated_token, user)
 
