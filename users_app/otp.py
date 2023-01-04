@@ -46,12 +46,12 @@ def get_user_reset_password_code(user_id: str | int | UUID):
 
 @celery_app.task(ignore_result=True)
 def send_user_verification_code(
-    is_verified: bool,
+    is_identifier_verified: bool,
     user_id: str | int | UUID,
     user_identifier: str | PhoneNumber,
 ) -> None:
-    if is_verified:
-        raise ValueError("User is already verified")
+    if is_identifier_verified:
+        raise ValueError("User identifier is already verified")
 
     activation_key: str = activation_key_generator()
     message = f"""
