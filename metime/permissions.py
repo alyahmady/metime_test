@@ -22,14 +22,22 @@ class IsActiveUser(IsAuthenticated):
         conditions = (
             is_authenticated,
             getattr(request.user, "is_active", False),
-            getattr(request.user, "can_login", False),
             (not isinstance(request.user, AnonymousUser)),
             (isinstance(request.user, get_user_model())),
         )
         return all(conditions)
 
 
-class IsOwnerUser(IsActiveUser):
+class IsVerifiedActiveUser(IsActiveUser):
+    message = "User is not verified"
+
+    def has_permission(self, request, view):
+        is_active_user = super(IsVerifiedActiveUser, self).has_permission(request, view)
+
+        return is_active_user and getattr(request.user, "can_login", False) is True
+
+
+class IsOwnerUser(IsVerifiedActiveUser):
     message = "Oops! You do not have permission to perform this action"
 
     def has_object_permission(self, request, view, obj):
@@ -41,10 +49,14 @@ class IsOwnerUser(IsActiveUser):
         return any(conditions)
 
 
-class IsAdminUser(IsActiveUser):
+class IsAdminUser(IsVerifiedActiveUser):
     message = "You do not have permission to perform this action"
 
     def has_permission(self, request, view):
-        is_active_user = super(IsActiveUser, self).has_permission(request, view)
+        is_verified_active_user = super(IsActiveUser, self).has_permission(
+            request, view
+        )
 
-        return is_active_user and (request.user.is_staff or request.user.is_superuser)
+        return is_verified_active_user and (
+            request.user.is_staff or request.user.is_superuser
+        )
