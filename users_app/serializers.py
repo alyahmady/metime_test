@@ -2,7 +2,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, AuthenticationFailed
 
 from users_app.models import CustomUser
 from users_app.otp import send_user_verification_code
@@ -113,3 +113,45 @@ class UserSerializer(serializers.ModelSerializer):
 
         self._user_verification_process(user=instance)
         return instance
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(
+        write_only=True, required=True, allow_null=False, allow_blank=False
+    )
+    new_password = serializers.CharField(
+        write_only=True, required=True, allow_null=False, allow_blank=False
+    )
+    new_password_confirm = serializers.CharField(
+        write_only=True, required=True, allow_null=False, allow_blank=False
+    )
+
+    def __init__(self, *args, **kwargs):
+        try:
+            self.user: CustomUser = kwargs.pop("user")
+        except LookupError:
+            raise LookupError("User is required")
+
+        super().__init__(*args, **kwargs)
+
+    def validate(self, data):
+        data = super(ChangePasswordSerializer, self).validate(data)
+
+        current_password = data["current_password"]
+        if self.user.check_password(current_password) is False:
+            raise AuthenticationFailed("Current password doesn't match the user")
+
+        password = data["new_password"]
+        try:
+            password_confirm = data.pop("new_password_confirm")
+            assert password == password_confirm
+        except (AssertionError, LookupError):
+            raise ValidationError("Passwords doesn't match")
+        validate_password(password)
+
+        return data
+
+    def save(self, **kwargs):
+        new_password = self.validated_data.pop("new_password")
+        self.user.set_password(new_password)
+        self.user.save()
