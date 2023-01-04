@@ -1,0 +1,73 @@
+version: "3.9"
+
+services:
+  metime_back_service:
+    restart: always
+    container_name: metime_test_backend_service
+    hostname: metime_test_backend_service
+    build:
+      context: ./
+      dockerfile: ./local.Dockerfile
+    env_file:
+      - ./deploy/environments/.env
+    volumes:
+      - ./logs:/code/logs
+    expose:
+      - 8000
+#    networks:
+#      - metime-network
+
+  nginx:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    container_name: metime_test_nginx
+    hostname: metime_test_nginx
+    env_file:
+      - ./deploy/environments/.env.nginx
+    depends_on:
+      - metime_back_service
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./deploy/config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./deploy/config/nginx/conf.d:/etc/nginx/conf.d
+      - ./deploy/config/nginx/templates:/etc/nginx/templates
+      - ./logs/nginx:/var/log/nginx
+#    networks:
+#      - metime-network
+
+  redis:
+    image: docker.io/bitnami/redis:latest
+    restart: unless-stopped
+    container_name: metime_test_redis
+    hostname: metime_test_redis
+    env_file:
+      - ./deploy/environments/.env.redis
+    expose:
+      - 6379
+    volumes:
+      - ./redis_data:/bitnami/redis/data
+#    networks:
+#      - metime-network
+
+  database:
+    image: postgres:14-alpine
+    restart: unless-stopped
+    container_name: metime_test_postgres
+    hostname: metime_test_postgres
+    env_file:
+      - ./deploy/environments/.env.postgres
+    expose:
+      - 5432
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data/
+#    networks:
+#      - metime-network
+
+
+#networks:
+#  metime-network:
+#    external: true
+#
+#volumes:
+#  media-data:

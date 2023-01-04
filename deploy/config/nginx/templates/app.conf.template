@@ -1,0 +1,90 @@
+upstream backend_block {
+    server ${BACK_SERVER_HOST}:${BACK_SERVER_PORT} ;
+}
+
+# TODO For SSL Redirection from 80
+# server {
+# 	listen 80;
+# 	listen [::]:80;
+#
+# 	server_name ${NGINX_HOST} www.${NGINX_HOST};
+# 	server_tokens off;
+#
+# 	location ^~ /.well-known/acme-challenge/ {
+#         root /var/www/certbot;
+#     }
+#
+# 	return 301 https://$server_name$request_uri;
+# }
+
+
+server {
+
+    # TODO SSL Configurations
+    # listen 443 ssl http2;
+	# listen [::]:443 ssl http2;
+    # server_name ${NGINX_HOST} www.${NGINX_HOST};
+    # client_max_body_size ${NGINX_MAX_BODY_SIZE_MB}M;
+	# ssl_certificate /etc/nginx/ssl/live/${NGINX_HOST}/fullchain.pem;
+    # ssl_certificate_key /etc/nginx/ssl/live/${NGINX_HOST}/privkey.pem;
+	# ssl_session_cache shared:le_nginx_SSL:10m;
+	# ssl_session_timeout 1440m;
+	# ssl_session_tickets off;
+	# ssl_protocols TLSv1.2 TLSv1.3;
+	# ssl_prefer_server_ciphers off;
+	# ssl_ciphers "ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384";
+
+
+    # Normal Configurations
+
+    listen ${NGINX_PORT};
+    server_name ${NGINX_HOST};
+
+    location ~ /static/(.*) {
+        proxy_pass          http://backend_block/static/$1$is_args$args;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ /admin/(.*) {
+        proxy_pass          http://backend_block/admin/$1$is_args$args;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ /schema/(.*) {
+        proxy_pass          http://backend_block/schema/$1$is_args$args;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ /swagger/(.*) {
+        proxy_pass          http://backend_block/swagger/$1$is_args$args;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ /(?:api\/|api)(.*) {
+        proxy_pass          http://backend_block/$1$is_args$args;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+        proxy_set_header    X-Forwarded-Proto   $scheme;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    Host                $http_host;
+        proxy_redirect      off;
+    }
+
+    # TODO React built files serving
+    # location / {
+    #     root   /usr/share/nginx/html;
+    #     index  index.html index.htm;
+    #     try_files $uri $uri/ /index.html;
+    # }
+}

@@ -29,8 +29,7 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False if os.getenv("DEBUG", "false").lower() not in ("true", "yes") else True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
 # Application definition
 
@@ -147,7 +146,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -157,10 +157,9 @@ AUTH_USER_MODEL = "users_app.CustomUser"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOWED_ORIGINS = [
-    "https://example.com",
-    "https://sub.example.com",
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
+    "http://localhost:8000",
+    "http://localhost:9999",
+    f"http://localhost:{os.getenv('NGINX_PORT', '9999')}",
 ]
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
@@ -196,14 +195,15 @@ REST_FRAMEWORK = {
         "otp_code_verify": "1000/day",
         "token_obtain": "1000/day",
         "token_refresh": "1000/day",
+        "healthcheck": "1000/day",
     },
 }
 
 PHONENUMBER_DEFAULT_REGION = os.getenv("PHONENUMBER_DEFAULT_REGION", "IR")
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("ACCESS_TOKEN_LIFETIME_MINUTES", 60))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("REFRESH_TOKEN_LIFETIME_DAYS", 30))),
     "ROTATE_REFRESH_TOKENS": True,
     "UPDATE_LAST_LOGIN": False,
     "ALGORITHM": "HS256",
@@ -261,12 +261,12 @@ class UserIdentifierField(enum.Enum):
     PHONE = "phone"
 
 
-VERIFICATION_CODE_DIGITS_COUNT = 6
+VERIFICATION_CODE_DIGITS_COUNT = int(os.getenv("VERIFICATION_CODE_DIGITS_COUNT", 6))
 
-VERIFICATION_EMAIL_SUBJECT = "MeTime | Account Verification"
+VERIFICATION_EMAIL_SUBJECT = os.getenv("VERIFICATION_EMAIL_SUBJECT", "MeTime | Account Verification")
 VERIFICATION_CACHE_KEY = "{user_id}-{identifier_field}-VERIFY-KEY"
 VERIFICATION_TIMEOUT = 43200
 
-RESET_PASSWORD_EMAIL_SUBJECT = "MeTime | Password Recovery"
+RESET_PASSWORD_EMAIL_SUBJECT = os.getenv("RESET_PASSWORD_EMAIL_SUBJECT", "MeTime | Password Recovery")
 RESET_PASSWORD_CACHE_KEY = "{}-RESET-PASS"
 RESET_PASSWORD_TIMEOUT = 43200
