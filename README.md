@@ -117,6 +117,8 @@ python manage.py collectstatic --noinput
 python manage.py initialize
 ```
 
+  * For not experiencing pages without static files, you need to set `DEBUG` config as `True` within `metime/settings.py`.
+
 8- Run this commands, to start the project development server:
 
 **Linux**
@@ -131,3 +133,14 @@ gunicorn --workers=10 --bind=0.0.0.0:8000 metime.asgi:application -k uvicorn.wor
 ```
 
 **You project now is running on your _localhost_ on _8000_ port.**
+
+  * Admin Page -> [localhost:8000/admin](localhost:8000/admin)
+  * Swagger -> [localhost:8000/api/swagger](localhost:8000/api/swagger)
+
+APIs
+
+  * Login (POST) -> [localhost:8000/auth/token](localhost:8000/auth/token)
+  * Refresh Token (POST) -> [localhost:8000/auth/token/refresh](localhost:8000/auth/token/refresh)
+  * User Register (POST) -> [localhost:8000/users](localhost:8000/users)
+  * User Profile (PATCH) -> [localhost:8000/users/USER_ID](localhost:8000/users/1)
+  * Password Change (PUT) -> [localhost:8000/users/USER_ID/password](localhost:8000/users/1/password)
