@@ -5,17 +5,78 @@ This project include an authentication/authorization system
 Make sure that you have **Docker and Docker Compose** installed, before you build the project with Docker.
 [Download](https://docs.docker.com/compose/install/)
 
-## Production build (Docker)
+----
 
+## Configurations
+
+You need to check and set configurations of the project, for Docker deployments and builds.
+
+* First, make a copy of the example configurations:
+
+    **Windows**
+    ```bash
+    copy .\deploy\environments\.env.example .\deploy\environments\.env
+    ```
+  
+    **Linux**
+    ```bash
+    cp ./deploy/environments/.env.example ./deploy/environments/.env
+    ```
+
+* Take a look at the file in this address, with a text editor and change as you wish
+
+    **Windows**
+    ```bash
+    notepad.exe .\deploy\environments\.env
+    ```
+  
+    **Linux**
+    ```bash
+    nano ./deploy/environments/.env
+    ```
+  
+  * **It's better the re-set all password fields for more security.** If you did so, please take a look at other `env` files within `environments` directory, to set passwords of other related services, as well. **Please consider that username, password, and port configs of Redis and Postgres must be synced within all of these three files:**
+    * `.env`
+    * `.env.nginx`
+    * `.env.postgres`
+
+
+* In Admin page of your project, after building with Docker, you can start with the email and password that you set for `DJANGO_ADMIN_EMAIL` and `DJANGO_ADMIN_PASS` environment variables, within `.env` file.
+
+----
+
+
+## Automatic Build (Docker)
+
+**Production**
 ```bash
 docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
-## Local build (Docker)
-
+**Local**
 ```bash
 docker-compose -f docker-compose.local.yml up -d --build
 ```
+
+**You project now is running on your _localhost_ on _9999_ port.**
+
+Pages
+
+  * Admin Page -> [localhost:9999/admin/](localhost:9999/admin/)
+  * Swagger -> [localhost:9999/swagger/](localhost:9999/api/swagger/)
+
+APIs
+
+  * Login (POST) -> [localhost:9999/api/auth/token/](localhost:9999/api/auth/token/)
+  * Refresh Token (POST) -> [localhost:9999/api/auth/token/refresh/](localhost:9999/api/auth/token/refresh/)
+  * User Register (POST) -> [localhost:9999/api/users/](localhost:9999/api/users/)
+  * User Profile (PATCH) -> [localhost:9999/api/users/USER_ID/](localhost:9999/api/users/1/)
+  * Password Change (PUT) -> [localhost:9999/api/users/USER_ID/password/](localhost:9999/api/users/1/password/)
+  * Resend Verification Code (POST) -> [localhost:9999/api/users/verification/](localhost:9999/api/users/verification/resend/)
+  * Verify Verification Code (POST) -> [localhost:9999/api/users/verification/](localhost:9999/api/users/verification/)
+  * Healthcheck (GET) -> [localhost:9999/api/health/](localhost:9999/api/health/)
+
+-----
 
 ## Local build (without Docker)
 
@@ -47,36 +108,8 @@ python3 -m venv .venv
 pip install requirements.txt
 ```
 
-4- Then you need to check and set configurations of the project.
+4- Then you need to check and set configurations of the project. Instructions are at the bottom of the page.
 
-* First, make a copy of the example configurations:
-
-    **Windows**
-    ```bash
-    copy .\deploy\environments\.env.example .\deploy\environments\.env
-    ```
-  
-    **Linux**
-    ```bash
-    cp ./deploy/environments/.env.example ./deploy/environments/.env
-    ```
-
-* Take a look at the file in this address, with a text editor and change as you wish
-
-    **Windows**
-    ```bash
-    notepad.exe .\deploy\environments\.env
-    ```
-  
-    **Linux**
-    ```bash
-    nano ./deploy/environments/.env
-    ```
-  
-  * **It's better the re-set all password fields for more security.** If you did so, please take a look at other `env` files within `environments` directory, to set passwords of other related services, as well. **Please consider that username, password, and port configs of Redis and Postgres must be synced within all of these three files:**
-    * `.env`
-    * `.env.nginx`
-    * `.env.postgres`
   * You need to create your database and user on your local PostgreSQL server, before you set configurations with `POSTGRES_` prefix. To do so, you can run these queries on your PostgreSQL.
   
       ```bash
@@ -134,8 +167,10 @@ gunicorn --workers=10 --bind=0.0.0.0:8000 metime.asgi:application -k uvicorn.wor
 
 **You project now is running on your _localhost_ on _8000_ port.**
 
+Pages
+
   * Admin Page -> [localhost:8000/admin](localhost:8000/admin)
-  * Swagger -> [localhost:8000/api/swagger](localhost:8000/api/swagger)
+  * Swagger -> [localhost:8000/swagger](localhost:8000/api/swagger)
 
 APIs
 
@@ -144,3 +179,6 @@ APIs
   * User Register (POST) -> [localhost:8000/users](localhost:8000/users)
   * User Profile (PATCH) -> [localhost:8000/users/USER_ID](localhost:8000/users/1)
   * Password Change (PUT) -> [localhost:8000/users/USER_ID/password](localhost:8000/users/1/password)
+  * Resend Verification Code (POST) -> [localhost:8000/users/verification](localhost:8000/users/verification/resend)
+  * Verify Verification Code (POST) -> [localhost:8000/users/verification](localhost:8000/users/verification)
+  * Healthcheck (GET) -> [localhost:8000/health](localhost:8000/health)
