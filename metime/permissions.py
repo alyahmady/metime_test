@@ -53,7 +53,7 @@ class IsAdminUser(IsVerifiedActiveUser):
     message = "You do not have permission to perform this action"
 
     def has_permission(self, request, view):
-        is_verified_active_user = super(IsActiveUser, self).has_permission(
+        is_verified_active_user = super(IsVerifiedActiveUser, self).has_permission(
             request, view
         )
 

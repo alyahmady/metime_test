@@ -99,7 +99,7 @@ python -m venv .venv
 ```bash
 cd <PROJECT_DIR>
 python3 -m venv .venv
-.venv/bin/activate
+source .venv/bin/activate
 ```
 
 3- After that you should install project dependencies.

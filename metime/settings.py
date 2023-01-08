@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "drf_spectacular_sidecar",
     "phonenumber_field",
     "users_app.apps.UsersAppConfig",
+    "auth_app.apps.AuthAppConfig",
     "rest_framework_simplejwt",
 ]
 
